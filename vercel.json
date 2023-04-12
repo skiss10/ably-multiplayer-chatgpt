@@ -1,8 +1,7 @@
 {
-    "build": {
-      "env": {
-        "NODE_VERSION": "16.x"
-      }
+  "build": {
+    "env": {
+      "NODE_VERSION": "16.17.0"
     }
   }
-  
+}
