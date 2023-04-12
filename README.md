@@ -416,7 +416,7 @@ When creating a CSS class on a JSX element, we use the following syntax on the e
  className={styles.yourClassName}
 ```
 
-and the accompanying css would look like this:
+and the accompanying css would look like this: 
 
 ```css
 .yourClassName {
