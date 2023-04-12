@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import axios from "axios";
+import { OpenAIApi } from 'openai';
 
 const AblyChatComponent = () => {
 
@@ -26,22 +26,20 @@ const AblyChatComponent = () => {
     try {
       setFetchingChatGPTResponse(true);
   
-      const response = await axios.post(
-        "https://api.openai.com/v1/engines/davinci-codex/completions",
-        {
-          prompt: messageText,
-          max_tokens: 150,
-          n: 1,
-          stop: ">>>",
-          temperature: 0.7,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const openaiApi = new OpenAIApi({
+        apiKey: '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'
+      });
+
+      console.log(process.env.OPENAI_API_KEY)
+  
+      const response = await openai.complete({
+        engine: 'davinci-codex',
+        prompt: messageText,
+        maxTokens: 150,
+        n: 1,
+        stop: '>>>',
+        temperature: 0.7
+      });
   
       const chatGPTResponse = response.data.choices[0].text;
   
@@ -53,13 +51,11 @@ const AblyChatComponent = () => {
       console.error("Error fetching ChatGPT response:", error);
   
       // Add error handling here
-      setError(error.message);
     } finally {
       setFetchingChatGPTResponse(false);
     }
   };
   
-
   const sendChatMessage = async (messageText) => {
     if (isChatGPTTrigger(messageText)) {
       await sendChatGPTResponse(messageText);
@@ -67,7 +63,9 @@ const AblyChatComponent = () => {
       channel.publish({ name: "chat-message", data: messageText });
     }
     setMessageText("");
-    inputBox.focus();
+    if (inputBox) {
+      inputBox.focus();
+    }
   };
 
   const handleFormSubmission = (event) => {
