@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import { OpenAIApi } from 'openai';
+import { Configuration, OpenAIApi } from 'openai';
 
 const AblyChatComponent = () => {
 
@@ -12,6 +12,12 @@ const AblyChatComponent = () => {
   const [receivedMessages, setMessages] = useState([]);
   const [fetchingChatGPTResponse, setFetchingChatGPTResponse] = useState(false);
   const messageTextIsEmpty = messageText.trim().length === 0;
+
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const openai = new OpenAIApi(configuration);
 
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
@@ -25,12 +31,6 @@ const AblyChatComponent = () => {
   const sendChatGPTResponse = async (messageText) => {
     try {
       setFetchingChatGPTResponse(true);
-  
-      const openaiApi = new OpenAIApi({
-        apiKey: process.env.OPENAI_API_KEY
-      });
-
-      console.log(process.env.OPENAI_API_KEY)
   
       const response = await openai.complete({
         engine: 'davinci-codex',
