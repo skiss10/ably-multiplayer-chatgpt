@@ -442,20 +442,3 @@ In order to deploy your new chat app to Vercel you'll need to:
 6. Watch your app deploy
 7. Visit the newly created URL in your browser!
 
-# Make it your own
-
-There are a few ways that this example could be extended:
-
-## Add message history
-
-There is currently no chat history in this demo, you'll only see messages that come in after you join the chat. You could expand this demo by using [Ably's rewind feature](https://www.ably.io/documentation/realtime/history) for up to two minutes of history for free, or with a paid account, for up to ~48 hours.
-
-## Add user names
-
-There aren't any usernames sent with the chat messages. This demo could be extended to introduce a username input box, and to add the current username to messages as they're sent.
-
-The demo uses the randomly generated Ably client Id as a unique identifier - which is how it can detect if it is "me" or "someone else" who sent the message.
-
-# Let us Know
-
-If this tutorial was helpful, or you're using Next.js and Ably in your project, we'd love to hear about it. Drop us a [message on Twitter](https://twitter.com/ablyrealtime) or email us at [devrel@ably.io](mailto:devrel@ably.io).
