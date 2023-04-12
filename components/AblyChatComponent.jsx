@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import { OpenAIApi } from 'openai';
+import { OpenAIApi } from '@openai/api';
 
 const AblyChatComponent = () => {
 
@@ -27,7 +27,7 @@ const AblyChatComponent = () => {
       setFetchingChatGPTResponse(true);
   
       const openaiApi = new OpenAIApi({
-        apiKey: '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'
+        apiKey: process.env.OPENAI_API_KEY
       });
 
       console.log(process.env.OPENAI_API_KEY)
