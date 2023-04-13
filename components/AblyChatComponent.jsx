@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import { Configuration, OpenAIApi } from "openai";
+const { Configuration, OpenAIApi } = require("openai");
 
 const AblyChatComponent = () => {
 
@@ -32,24 +32,33 @@ const AblyChatComponent = () => {
     try {
       setFetchingChatGPTResponse(true);
   
-      const response = await openai.createCompletion({
-        engine: "text-davinci-003",
-        prompt: messageText,
-        maxTokens: 150,
-        n: 1,
-        stop: '>>>',
-        temperature: 0.7
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      };
+    
+      const response = await fetch('https://api.openai.com/v1/engines/text-davinci-002/completions', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          prompt: messageText,
+          max_tokens: 150,
+          n: 1,
+          stop: '>>>',
+          temperature: 0.7
+        })
       });
-  
-      const chatGPTResponse = response.data.choices[0].text;
-  
+    
+      const data = await response.json();
+      const chatGPTResponse = data.choices[0].text;
+    
       channel.publish({
         name: "chat-message",
         data: `ChatGPT: ${chatGPTResponse}`,
       });
     } catch (error) {
       console.error("Error fetching ChatGPT response:", error);
-  
+    
       // Add error handling here
     } finally {
       setFetchingChatGPTResponse(false);
