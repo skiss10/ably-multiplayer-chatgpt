@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
+
 const { Configuration, OpenAIApi } = require("openai");
 
 const configuration = new Configuration({
