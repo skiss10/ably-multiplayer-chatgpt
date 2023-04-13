@@ -33,7 +33,7 @@ const AblyChatComponent = () => {
     try {
       setFetchingChatGPTResponse(true);
   
-      const response = await openai.complete({
+      const response = await openai.createCompletion({
         engine: 'davinci-codex',
         prompt: messageText,
         maxTokens: 150,
