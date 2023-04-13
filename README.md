@@ -39,6 +39,14 @@ Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/ser
 
 We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a Next.js serverless function which will be used to connect to Ably. Further, users of the chat application will be able to query ChatGPT and prompt it to share responses in the group chat.
 
+# How to prompt ChatGPT?
+
+It's as simple as following whatever prompt you want to provide to ChatGPT with "Hey ChatGPT... 'prompt'". So if you want to ask ChatGPT about Tony Stark, you would publish the following into the chat:
+
+Hey ChatGPT... Who is Tony Stark?
+
+TODO - add image
+
 ## Dependencies
 
 In order to build this app, you will need:
