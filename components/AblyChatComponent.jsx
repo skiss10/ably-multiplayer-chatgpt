@@ -37,8 +37,7 @@ const AblyChatComponent = () => {
         model: "text-davinci-003",
         prompt: messageText,
       });
-    
-      console.log(completion.data.choices[0].text);
+      
       const chatGPTResponse = completion.data.choices[0].text;
     
       channel.publish({
