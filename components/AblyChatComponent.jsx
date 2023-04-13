@@ -27,7 +27,7 @@ const AblyChatComponent = () => {
 
   const isChatGPTTrigger = (message) => {
     return message.startsWith("Hey ChatGPT...");
-  };
+  }; 
 
   const sendChatGPTResponse = async (messageText) => {
     try {
