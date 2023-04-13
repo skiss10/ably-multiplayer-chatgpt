@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import OpenAI from "openai";
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: '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',
+
+});
+
+const openai = new OpenAIApi(configuration);
 
 const AblyChatComponent = () => {
 
@@ -25,26 +32,14 @@ const AblyChatComponent = () => {
   const sendChatGPTResponse = async (messageText) => {
     try {
       setFetchingChatGPTResponse(true);
-  
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer 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`
-      };
 
-      OpenAI.apiKey = process.env.OPENAI_API_KEY;
-
-      const response = await OpenAI.Completion.create({
-        engine: "text-davinci-003",
+      const completion = await openai.createCompletion({
+        model: "text-davinci-003",
         prompt: messageText,
-        max_tokens: 50,
-        temperature: 0,
-        top_p: 1,
-        n: 1,
-        stop: "\n",
       });
     
-      const data = response.data;
-      const chatGPTResponse = data.choices[0].text;
+      console.log(completion.data.choices[0].text);
+      const chatGPTResponse = completion.data.choices[0].text;
     
       channel.publish({
         name: "chat-message",
