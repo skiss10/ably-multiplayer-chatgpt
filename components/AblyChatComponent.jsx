@@ -36,16 +36,20 @@ const AblyChatComponent = () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       };
-    
-      const response = await fetch('https://api.openai.com/v1/engines/text-davinci-002/completions', {
+
+      const response = await fetch('https://api.openai.com/v1/completions', {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          prompt: messageText,
-          max_tokens: 150,
-          n: 1,
-          stop: '>>>',
-          temperature: 0.7
+          "model": "text-davinci-003",
+          "prompt": messageText,
+          "max_tokens": 7,
+          "temperature": 0,
+          "top_p": 1,
+          "n": 1,
+          "stream": false,
+          "logprobs": null,
+          "stop": "\n"
         })
       });
     
