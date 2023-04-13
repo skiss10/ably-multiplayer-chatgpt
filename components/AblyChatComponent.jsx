@@ -53,16 +53,18 @@ const AblyChatComponent = () => {
   };
   
   const sendChatMessage = async (messageText) => {
+    // Publish the original message to the channel first.
+    channel.publish({ name: "chat-message", data: messageText });
+
     if (isChatGPTTrigger(messageText)) {
-      await sendChatGPTResponse(messageText);
-    } else {
-      channel.publish({ name: "chat-message", data: messageText });
+        await sendChatGPTResponse(messageText);
     }
+
     setMessageText("");
     if (inputBox) {
-      inputBox.focus();
+        inputBox.focus();
     }
-  };
+};
 
   const handleFormSubmission = (event) => {
     event.preventDefault();
