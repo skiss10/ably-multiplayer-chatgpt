@@ -274,6 +274,40 @@ Now we'll make use of the `useChannel` hook that we imported earlier.
   });
 ```
 
+Now, let's discuss the ChatGPT integration and how messages are handled.
+
+We have two additional functions: isChatGPTTrigger and sendChatGPTResponse. The former checks if a message should trigger a ChatGPT response, while the latter sends a request to the OpenAI API, receives the response, and publishes it to the chat.
+
+```jsx
+const isChatGPTTrigger = (message) => {
+    return message.startsWith("Hey ChatGPT...");
+  }; 
+
+  const sendChatGPTResponse = async (messageText) => {
+    try {
+      setFetchingChatGPTResponse(true);
+
+      const completion = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: messageText,
+      });
+      
+      const chatGPTResponse = completion.data.choices[0].text;
+    
+      channel.publish({
+        name: "chat-message",
+        data: `ChatGPT: ${chatGPTResponse}`,
+      });
+    } catch (error) {
+      console.error("Error fetching ChatGPT response:", error);
+    
+      // Add error handling here
+    } finally {
+      setFetchingChatGPTResponse(false);
+    }
+  };
+```
+
 Next, we need to handle the UI interactions by defining a few functions.
 
 First, there's `sendChatMessage`, which is responsible for publishing new messages.
@@ -300,20 +334,42 @@ In addition, the `handleKeyPress` event is wired up to make sure that if a user 
 
 ```jsx
   const handleKeyPress = (event) => {
-    if (e.charCode !== 13 || messageTextIsEmpty) {
+    if (event.key !== 'Enter' || messageTextIsEmpty) {
       return;
     }
     sendChatMessage(messageText);
     event.preventDefault();
-  }
+  };
 ```
 
-Next, we need to construct the UI elements to display the messages. To do this, we will [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) the received Ably messages into HTML span elements:
+Next, we need to construct the UI elements to display the messages, including ChatGPT responses. To do this, we will map the received Ably messages into HTML span elements:
+
+In this updated code, we first identify the author of the message by comparing the message.connectionId with ably.connection.id. If they match, the author is "me" (the current user); otherwise, it's "other" (another user).
+
+We then check if the message is a ChatGPT response by looking for the "ChatGPT: " prefix using startsWith.
+
+Based on whether the message is a ChatGPT response or not, we assign the appropriate CSS class to the className variable. For ChatGPT messages, we use the styles.chatGPTMessage class, and for regular messages, we use the styles.message class.
+
+Finally, we return a span element with the determined key, className, and data-author attributes, and display the message content using {message.data}.
 
 ```jsx
   const messages = receivedMessages.map((message, index) => {
     const author = message.connectionId === ably.connection.id ? "me" : "other";
-    return <span key={index} className={styles.message} data-author={author}>{message.data}</span>;
+    const isGPTMessage = message.data.startsWith("ChatGPT: ");
+
+    const className = isGPTMessage
+      ? styles.chatGPTMessage
+      : styles.message;
+
+    return (
+      <span
+        key={index}
+        className={className}
+        data-author={author}
+      >
+        {message.data}
+      </span>
+    );
   });
 ```
 
@@ -331,7 +387,7 @@ We use a `useEffect` hook along with [`scrollIntoView()`](https://developer.mozi
   });
 ```
 
-Finally we will write the React component markup with the event handlers all bound up to `onChange` and `onKeyPress` events in JSX.
+Finally we will write the React component markup with the event handlers all bound up to `onChange` and `onKeyDown` events in JSX.
 
 The markup itself is just a few div elements and a form with a textarea for user input.
 
@@ -344,7 +400,12 @@ The returned markup will look like this:
     <div className={styles.chatHolder}>
       <div className={styles.chatText}>
         {messages}
-        <div ref={(element) => { messageEnd = element; }}></div> // empty element to control scroll to bottom
+        {fetchingChatGPTResponse && (
+          <span className={styles.fetchingMessage}>
+            Fetching response from ChatGPT...
+          </span>
+        )}
+        <div ref={(element) => { messageEnd = element; }}></div>
       </div>
       <form onSubmit={handleFormSubmission} className={styles.form}>
         <textarea
@@ -352,7 +413,7 @@ The returned markup will look like this:
           value={messageText}
           placeholder="Type a message..."
           onChange={e => setMessageText(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           className={styles.textarea}
         ></textarea>
         <button type="submit" className={styles.button} disabled={messageTextIsEmpty}>Send</button>
