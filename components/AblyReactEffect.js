@@ -25,7 +25,7 @@ export function useChannel(channelName, callbackOnMessage) {
         return () => { onUnmount(); };
     };
 
-    useEffect(useEffectHook, []);
+    useEffect(useEffectHook);
 
     return [chatChannel, ably];
 }
