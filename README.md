@@ -1,15 +1,18 @@
-# Building a Realtime Chat App with Next.js, Ably, and Vercel
+# Building a Realtime Chat App with ChatGPT using Next.js, Ably, and Vercel
 
 https://next-js-chat-app.vercel.app/
 
-This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform.
+This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the basic chat functionality, this app incorporates OpenAI's ChatGPT, an advanced language model, to enhance user experience and provide AI-powered chat assistance.
 
 You'll learn how to - 
 * Create a brand new Next.js application
 * Create an Ably account and get an API key
 * Create a Next.js Vercel Serverless API
 * Use React Functional components and React Hooks with Ably
+* Integrate ChatGPT with your chat application
+* Use ChatGPT to provide AI-powered responses and assistance within the chat
 * Host your app on Vercel
+
 
 [Next.js](https://nextjs.org/) is a React framework from [Vercel](https://vercel.com/). It is used to build static web applications with server side rendering, serverless functions and seamless hosting. It's a framework that takes the React knowledge you already have, and puts some structure and conventions in place.
 
@@ -18,6 +21,10 @@ You'll learn how to -
 [Vercel](https://vercel.com/) is a hosting platform, built from the ground up to host Next.js apps, and Serverless Functions with them.
 
 [React](https://reactjs.org/) is a JavaScript library for building user interfaces with encapsulated components that manage their own state.
+
+[OpenAI](https://www.openai.com/) is an artificial intelligence research lab that develops cutting-edge AI models like ChatGPT, designed to understand and generate human-like text based on user input.
+
+[ChatGPT](https://platform.openai.com/docs/guides/chat/overview) is a powerful language model built on OpenAI's GPT architecture. It can be used to create engaging and context-aware chatbots, generate text, answer questions, and much more.
 
 # WebSockets in Vercel with Ably
 
@@ -30,7 +37,7 @@ Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/ser
 ![The UI of the chat app we'll build. It is a window with speech bubbles for text.](https://cdn.glitch.com/0cb30add-c9ef-4c00-983c-e12deb0d4080%2Fchatapp.png?v=1612279601157)  
 *The UI of the app we'll build with this walkthrough*  
 
-We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a Next.js serverless function which will be used to connect to Ably.
+We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a Next.js serverless function which will be used to connect to Ably. Further, users of the chat application will be able to query ChatGPT and prompt it to share responses in the group chat.
 
 ## Dependencies
 
@@ -39,6 +46,7 @@ In order to build this app, you will need:
 * **An Ably account** for sending messages: [Create an account with Ably for free](https://www.ably.io/signup).
 * **A Vercel Account** for hosting on production: [Create an account with Vercel for free](https://vercel.com/signup).
 * **Node 12** (LTS) or greater: [Install Node](https://nodejs.org/en/).
+* **An OpenAI account** for accessing ChatGPT: [Create an account with OpenAI for free](https://beta.openai.com/signup). Note that while API usage during the trial period is free, you may need to upgrade to a paid plan for continued access.
 
 ## Local dev pre-requirements
 
@@ -213,6 +221,18 @@ import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
 ```
 
+Next we set up the OpenAI API client for interacting with the ChatGPT model.
+
+```jsx
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: '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',
+});
+
+const openai = new OpenAIApi(configuration);
+```
+
 Then we'll define the function that will be exported as a React Functional component. We need to access some HTML elements in the code so we can create variables to store their references:
 
 ```jsx
@@ -227,11 +247,13 @@ Next, set up the state properties that we'll use in the component:
 ```jsx
   const [messageText, setMessageText] = useState("");
   const [receivedMessages, setMessages] = useState([]);
+  const [fetchingChatGPTResponse, setFetchingChatGPTResponse] = useState(false);
   const messageTextIsEmpty = messageText.trim().length === 0;
 ```
 
 * **messageText** will be bound to textarea element where messages can be typed
 * **receiveMessages** to the on screen chat history
+* **setFetchingChatGPTResponse** A boolean state variable that indicates whether the ChatGPT response is being fetched or not. This is used to display a loading indicator or handle any UI changes during the API call.
 * **messageTextIsEmpty** is used to disable the send button when the textarea is empty
 
 Now we'll make use of the `useChannel` hook that we imported earlier.
