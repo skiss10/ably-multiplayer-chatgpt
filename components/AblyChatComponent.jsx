@@ -23,7 +23,7 @@ const AblyChatComponent = () => {
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
     setMessages([...history, message]);
-  });
+  }); 
 
   const isChatGPTTrigger = (message) => {
     return message.startsWith("Hey ChatGPT...");
