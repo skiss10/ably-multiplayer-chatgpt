@@ -14,7 +14,6 @@ const AblyChatComponent = () => {
   const messageTextIsEmpty = messageText.trim().length === 0;
 
   const configuration = new Configuration({
-    organization: "org-qlV8tSpyMckwdhHXiMPN1NbX",
     apiKey: process.env.OPENAI_API_KEY,
   });
 
