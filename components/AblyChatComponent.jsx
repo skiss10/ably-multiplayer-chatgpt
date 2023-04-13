@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-const { Configuration, OpenAIApi } = require("openai");
+import * as OpenAI from "openai";
 
 const AblyChatComponent = () => {
 
@@ -12,12 +12,6 @@ const AblyChatComponent = () => {
   const [receivedMessages, setMessages] = useState([]);
   const [fetchingChatGPTResponse, setFetchingChatGPTResponse] = useState(false);
   const messageTextIsEmpty = messageText.trim().length === 0;
-
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
-  const openai = new OpenAIApi(configuration);
 
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
@@ -37,23 +31,19 @@ const AblyChatComponent = () => {
         'Authorization': `Bearer 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`
       };
 
-      const response = await fetch('https://api.openai.com/v1/completions', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          "model": "text-davinci-003",
-          "prompt": messageText,
-          "max_tokens": 50,
-          "temperature": 0,
-          "top_p": 1,
-          "n": 1,
-          "stream": false,
-          "logprobs": null,
-          "stop": "\n"
-        })
+      OpenAI.apiKey = process.env.OPENAI_API_KEY;
+
+      const response = await OpenAI.Completion.create({
+        engine: "text-davinci-003",
+        prompt: messageText,
+        max_tokens: 50,
+        temperature: 0,
+        top_p: 1,
+        n: 1,
+        stop: "\n",
       });
     
-      const data = await response.json();
+      const data = response.data;
       const chatGPTResponse = data.choices[0].text;
     
       channel.publish({
