@@ -34,7 +34,7 @@ const AblyChatComponent = () => {
   
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer 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`
       };
 
       const response = await fetch('https://api.openai.com/v1/completions', {
