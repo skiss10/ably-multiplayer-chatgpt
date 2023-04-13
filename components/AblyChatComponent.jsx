@@ -43,7 +43,7 @@ const AblyChatComponent = () => {
         body: JSON.stringify({
           "model": "text-davinci-003",
           "prompt": messageText,
-          "max_tokens": 7,
+          "max_tokens": 50,
           "temperature": 0,
           "top_p": 1,
           "n": 1,
