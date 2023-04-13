@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, OpenAIApi } from "openai";
 
 const AblyChatComponent = () => {
 
