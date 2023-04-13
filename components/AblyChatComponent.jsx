@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
-import * as OpenAI from "openai";
+import OpenAI from "openai";
 
 const AblyChatComponent = () => {
 
@@ -77,7 +77,7 @@ const AblyChatComponent = () => {
   };
 
   const handleKeyPress = (event) => {
-    if (event.charCode !== 13 || messageTextIsEmpty) {
+    if (event.key !== 'Enter' || messageTextIsEmpty) {
       return;
     }
     sendChatMessage(messageText);
@@ -124,7 +124,7 @@ const AblyChatComponent = () => {
           value={messageText}
           placeholder="Type a message..."
           onChange={e => setMessageText(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           className={styles.textarea}
         ></textarea>
         <button type="submit" className={styles.button} disabled={messageTextIsEmpty}>Send</button>
