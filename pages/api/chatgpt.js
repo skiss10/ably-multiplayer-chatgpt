@@ -1,14 +1,8 @@
 // /api/chatgpt.js
 import { Configuration, OpenAIApi } from 'openai';
 
-module.exports = async (req, res) => {
-  const API_KEY = process.env.OPENAI_API_KEY;
-
-  res.status(200).json({ message: 'Success' });
-};
-
 const configuration = new Configuration({
-  apiKey: API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const openai = new OpenAIApi(configuration);

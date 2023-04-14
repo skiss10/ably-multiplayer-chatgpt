@@ -1,16 +1,11 @@
 // Import Ably SDK
 import Ably from "ably/promises";
 
-module.exports = async (req, res) => {
-  const API_KEY = process.env.ABLY_API_KEY;
-  res.status(200).json({ message: 'Success' });
-};
-
 // Create an async function to handle the request and response
 export default async function handler(req, res) {
   try {
     // Instantiate Ably client with API key
-    const client = new Ably.Realtime(API_KEY);
+    const client = new Ably.Realtime(process.env.ABLY_API_KEY);
 
     // Generate a token request with a specified client ID
     const tokenRequestData = await client.auth.createTokenRequest({ clientId: 'ably-nextjs-demo' });
