@@ -139,12 +139,14 @@ The topology of our Next.js app will look like this:
 │    │   
 │    └─── api
 │          └─ createTokenRequest.js
+│          └─ chatgpt.js
 │           
 └─── public
 ```
 
 * `/pages/index.js` is the home page
 * `/api/createTokenRequest.js` is our Ably token authentication API
+* `/api/chatgpt.js` is our OpenAI Completion API 
 * `/components/AblyChatComponent.jsx` is the chat component
 * `/components/AblyChatComponent.module.css` contains the styles for the chat component
 * `/components/AblyReactEffect.js` is the Ably React Hook.
@@ -229,18 +231,6 @@ import { useChannel } from "./AblyReactEffect";
 import styles from './AblyChatComponent.module.css';
 ```
 
-Next we set up the OpenAI API client for interacting with the ChatGPT model.
-
-```jsx
-const { Configuration, OpenAIApi } = require("openai");
-
-const configuration = new Configuration({
-  apiKey: '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',
-});
-
-const openai = new OpenAIApi(configuration);
-```
-
 Then we'll define the function that will be exported as a React Functional component. We need to access some HTML elements in the code so we can create variables to store their references:
 
 ```jsx
@@ -284,10 +274,10 @@ Now we'll make use of the `useChannel` hook that we imported earlier.
 
 Now, let's discuss the ChatGPT integration and how messages are handled.
 
-We have two additional functions: isChatGPTTrigger and sendChatGPTResponse. The former checks if a message should trigger a ChatGPT response, while the latter sends a request to the OpenAI API, receives the response, and publishes it to the chat.
+We have two additional functions: isChatGPTTrigger and sendChatGPTResponse. The former checks if a message should trigger a ChatGPT response, while the latter triggers a vercel lembda to send a request to the OpenAI API, receives the response, and publishes it to the chat.
 
 ```jsx
-const isChatGPTTrigger = (message) => {
+  const isChatGPTTrigger = (message) => {
     return message.startsWith("Hey ChatGPT...");
   }; 
 
@@ -295,12 +285,22 @@ const isChatGPTTrigger = (message) => {
     try {
       setFetchingChatGPTResponse(true);
 
-      const completion = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: messageText,
+      const response = await fetch('/api/chatgpt', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: messageText }), // Use messageText instead of msg.data
+        headers: { 'Content-Type': 'application/json' },
       });
-      
-      const chatGPTResponse = completion.data.choices[0].text;
+
+      // Check if the response is ok (status code in the 200-299 range)
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+    // Parse the JSON response
+      const data = await response.json();
+
+      // Extract the chatGPTResponse from the data object
+      const chatGPTResponse = data.response;
     
       channel.publish({
         name: "chat-message",
@@ -434,6 +434,43 @@ export default AblyChatComponent;
 ```
 
 Right at the bottom of the file, the function is exported as `AblyChatComponent` so that it can be referenced in the Next.js page we created at the start.
+
+## Use a Vercel Lambda to query OpenAI
+
+Now we need to define a serverless function for our Next.js application that communicates with the OpenAI API to generate text completions using a ChatGPT model. It extracts a prompt from the request body, sends it to the API, and returns the generated text in a JSON response. In case of errors, it logs the error message and sends a JSON response with the error details and a 500 status code.
+
+```jsx
+// /api/chatgpt.js
+import { Configuration, OpenAIApi } from 'openai';
+
+const configuration = new Configuration({
+  apiKey: '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',
+});
+
+const openai = new OpenAIApi(configuration);
+
+export default async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    const completion = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: prompt,
+        temperature: 0.6,
+      });
+
+    const chatGPTResponse = completion.data.choices[0].text;
+
+    console.log(chatGPTResponse)
+    console.log("hit serverless function")
+
+    res.status(200).json({ response: chatGPTResponse });
+  } catch (error) {
+    console.error('Error fetching ChatGPT response:', error);
+    res.status(500).json({ error: `Error fetching ChatGPT response: ${error.message}`, details: error });
+  }
+};
+```
 
 ## Using Ably correctly in React Components
 
