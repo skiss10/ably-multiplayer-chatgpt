@@ -92,6 +92,10 @@ const AblyChatComponent = () => {
     const author = message.connectionId === ably.connection.id ? "me" : "other";
     const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
     const className = isGPTMessage ? styles.chatGPTMessage : styles.message;
+  
+    // Set the font color based on the message author.
+    const fontColor = author === "me" ? "#FFFFFF" : "#000000";
+  
     return (
       <div key={index} className={styles.messageWrapper}>
         <div
@@ -101,7 +105,7 @@ const AblyChatComponent = () => {
         <span
           className={className}
           data-author={author}
-          style={{ color: message.data.color }}
+          style={{ color: fontColor }} // Use the fontColor variable here
         >
           {message.data.text}
         </span>
