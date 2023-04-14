@@ -51,3 +51,16 @@
     flex-grow: 0;
     border-bottom-left-radius: 0;
 }
+
+.messageWrapper {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 5px;
+  }
+  
+  .colorSquare {
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+  }
+  

@@ -14,16 +14,15 @@ const AblyChatComponent = () => {
   const [userColor, setUserColor] = useState(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
   );
-  
 
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
     setMessages([...history, message]);
-  }); 
+  });
 
   const isChatGPTTrigger = (message) => {
     return message.startsWith("Hey ChatGPT...");
-  }; 
+  };
 
   const sendChatGPTResponse = async (messageText) => {
     try {
@@ -92,20 +91,21 @@ const AblyChatComponent = () => {
   const messages = receivedMessages.map((message, index) => {
     const author = message.connectionId === ably.connection.id ? "me" : "other";
     const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
-  
-    const className = isGPTMessage
-      ? styles.chatGPTMessage
-      : styles.message;
-  
+    const className = isGPTMessage ? styles.chatGPTMessage : styles.message;
     return (
-      <span
-        key={index}
-        className={className}
-        data-author={author}
-        style={{ color: message.data.color }} // Add the user's color here
-      >
-        {message.data.text}
-      </span>
+      <div key={index} className={styles.messageWrapper}>
+        <div
+          className={styles.colorSquare}
+          style={{ backgroundColor: message.data.color }}
+        ></div>
+        <span
+          className={className}
+          data-author={author}
+          style={{ color: message.data.color }}
+        >
+          {message.data.text}
+        </span>
+      </div>
     );
   });
 
@@ -115,26 +115,7 @@ const AblyChatComponent = () => {
 
   return (
     <div className={styles.chatHolder}>
-      <div className={styles.chatText}>
-        {messages}
-        {fetchingChatGPTResponse && (
-          <span className={styles.fetchingMessage}>
-            Fetching response from ChatGPT...
-          </span>
-        )}
-        <div ref={(element) => { messageEnd = element; }}></div>
-      </div>
-      <form onSubmit={handleFormSubmission} className={styles.form}>
-        <textarea
-          ref={(element) => { inputBox = element; }}
-          value={messageText}
-          placeholder="Type a message! Prompt ChatGPT with 'Hey ChatGPT...' before asking your question"
-          onChange={e => setMessageText(e.target.value)}
-          onKeyDown={handleKeyPress}
-          className={styles.textarea}
-        ></textarea>
-        <button type="submit" className={styles.button} disabled={messageTextIsEmpty}>Send</button>
-      </form>
+      {/* ... */}
     </div>
   )
 }
