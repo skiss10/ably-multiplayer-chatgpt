@@ -47,7 +47,7 @@ const AblyChatComponent = () => {
   
     channel.publish({
       name: "chat-message",
-      data: { text: `ChatGPT: ${chatGPTResponse}`, color: "#000000" }, // Change this line
+      data: { text: `ChatGPT: ${chatGPTResponse}`, color: userColor },
     });
   } catch (error) {
     console.error("Error fetching ChatGPT response:", error);
@@ -66,7 +66,7 @@ const AblyChatComponent = () => {
     });
 
     if (isChatGPTTrigger(messageText)) {
-        await sendChatGPTResponse(messageText);
+      await sendChatGPTResponse(messageText, userColor);
     }
 
     setMessageText("");
