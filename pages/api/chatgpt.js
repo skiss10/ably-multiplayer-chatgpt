@@ -1,6 +1,8 @@
 // /api/chatgpt.js
 import { Configuration, OpenAIApi } from 'openai';
 
+console.log('chatgpt.js Loaded API key:', process.env.OPENAI_API_KEY);
+
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -9,6 +11,7 @@ const openai = new OpenAIApi(configuration);
 
 export default async (req, res) => {
   try {
+
     const { prompt } = req.body;
 
     const completion = await openai.createCompletion({

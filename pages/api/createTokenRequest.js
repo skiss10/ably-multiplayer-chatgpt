@@ -4,6 +4,9 @@ import Ably from "ably/promises";
 // Create an async function to handle the request and response
 export default async function handler(req, res) {
   try {
+
+    console.log('createTokenRequest.js Loaded API key:', process.env.ABLY_API_KEY);
+
     // Instantiate Ably client with API key
     const client = new Ably.Realtime(process.env.ABLY_API_KEY);
 
