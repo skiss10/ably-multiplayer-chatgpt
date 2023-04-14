@@ -128,7 +128,7 @@ const AblyChatComponent = () => {
         <textarea
           ref={(element) => { inputBox = element; }}
           value={messageText}
-          placeholder="Type a message..."
+          placeholder="Type a message! Prompt ChatGPT with 'Hey ChatGPT...' before asking your question"
           onChange={e => setMessageText(e.target.value)}
           onKeyDown={handleKeyPress}
           className={styles.textarea}
