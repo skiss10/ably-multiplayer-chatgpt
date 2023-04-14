@@ -25,6 +25,6 @@ export default async (req, res) => {
     res.status(200).json({ response: chatGPTResponse });
   } catch (error) {
     console.error('Error fetching ChatGPT response:', error);
-    res.status(500).json({ error: 'Error fetching ChatGPT response' });
+    res.status(500).json({ error: `Error fetching ChatGPT response: ${error.message}`, details: error });
   }
 };
