@@ -11,6 +11,10 @@ const AblyChatComponent = () => {
   const [receivedMessages, setMessages] = useState([]);
   const [fetchingChatGPTResponse, setFetchingChatGPTResponse] = useState(false);
   const messageTextIsEmpty = messageText.trim().length === 0;
+  const [userColor, setUserColor] = useState(
+    "#" + Math.floor(Math.random() * 16777215).toString(16)
+  );
+  
 
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
@@ -39,25 +43,28 @@ const AblyChatComponent = () => {
     // Parse the JSON response
       const data = await response.json();
 
-      // Extract the chatGPTResponse from the data object
-      const chatGPTResponse = data.response;
-    
-      channel.publish({
-        name: "chat-message",
-        data: `ChatGPT: ${chatGPTResponse}`,
-      });
-    } catch (error) {
-      console.error("Error fetching ChatGPT response:", error);
-    
-      // Add error handling here
-    } finally {
-      setFetchingChatGPTResponse(false);
-    }
-  };
+    // Extract the chatGPTResponse from the data object
+    const chatGPTResponse = data.response;
+  
+    channel.publish({
+      name: "chat-message",
+      data: { text: `ChatGPT: ${chatGPTResponse}`, color: "#000000" }, // Change this line
+    });
+  } catch (error) {
+    console.error("Error fetching ChatGPT response:", error);
+  
+    // Add error handling here
+  } finally {
+    setFetchingChatGPTResponse(false);
+  }
+};
   
   const sendChatMessage = async (messageText) => {
     // Publish the original message to the channel first.
-    channel.publish({ name: "chat-message", data: messageText });
+    channel.publish({
+      name: "chat-message",
+      data: { text: messageText, color: userColor },
+    });
 
     if (isChatGPTTrigger(messageText)) {
         await sendChatGPTResponse(messageText);
@@ -84,19 +91,20 @@ const AblyChatComponent = () => {
 
   const messages = receivedMessages.map((message, index) => {
     const author = message.connectionId === ably.connection.id ? "me" : "other";
-    const isGPTMessage = message.data.startsWith("ChatGPT: ");
-
+    const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
+  
     const className = isGPTMessage
       ? styles.chatGPTMessage
       : styles.message;
-
+  
     return (
       <span
         key={index}
         className={className}
         data-author={author}
+        style={{ color: message.data.color }} // Add the user's color here
       >
-        {message.data}
+        {message.data.text}
       </span>
     );
   });
