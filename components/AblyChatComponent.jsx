@@ -33,12 +33,22 @@ const AblyChatComponent = () => {
     try {
       setFetchingChatGPTResponse(true);
 
-      const completion = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: messageText,
+      const response = await fetch('/api/chatgpt', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: messageText }), // Use messageText instead of msg.data
+        headers: { 'Content-Type': 'application/json' },
       });
-      
-      const chatGPTResponse = completion.data.choices[0].text;
+
+      // Check if the response is ok (status code in the 200-299 range)
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+    // Parse the JSON response
+      const data = await response.json();
+
+      // Extract the chatGPTResponse from the data object
+      const chatGPTResponse = data.response;
     
       channel.publish({
         name: "chat-message",
