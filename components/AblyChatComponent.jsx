@@ -110,7 +110,7 @@ const AblyChatComponent = () => {
   });
 
   useEffect(() => {
-    messageEnd.scrollIntoView({ behaviour: "smooth" });
+    messageEnd?.scrollIntoView({ behavior: "smooth" });
   });
 
   return (
