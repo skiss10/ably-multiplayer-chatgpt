@@ -115,7 +115,26 @@ const AblyChatComponent = () => {
 
   return (
     <div className={styles.chatHolder}>
-      {/* ... */}
+      <div className={styles.chatText}>
+        {messages}
+        {fetchingChatGPTResponse && (
+          <span className={styles.fetchingMessage}>
+            Fetching response from ChatGPT...
+          </span>
+        )}
+        <div ref={(element) => { messageEnd = element; }}></div>
+      </div>
+      <form onSubmit={handleFormSubmission} className={styles.form}>
+        <textarea
+          ref={(element) => { inputBox = element; }}
+          value={messageText}
+          placeholder="Type a message! Prompt ChatGPT with 'Hey ChatGPT...' before asking your question"
+          onChange={e => setMessageText(e.target.value)}
+          onKeyDown={handleKeyPress}
+          className={styles.textarea}
+        ></textarea>
+        <button type="submit" className={styles.button} disabled={messageTextIsEmpty}>Send</button>
+      </form>
     </div>
   )
 }
