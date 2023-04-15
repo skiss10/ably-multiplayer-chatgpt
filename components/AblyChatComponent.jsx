@@ -20,6 +20,20 @@ const AblyChatComponent = () => {
     setMessages([...history, message]);
   });
 
+  useEffect(() => {
+    const fetchChannelHistory = async () => {
+      try {
+        const historyPage = await channel.history({ limit: 20 });
+        const historyMessages = historyPage.items.reverse();
+        setMessages(receivedMessages => [...receivedMessages, ...historyMessages]);
+      } catch (error) {
+        console.error('Error fetching channel history:', error);
+      }
+    };
+
+    fetchChannelHistory();
+  }, [channel]);
+
   const isChatGPTTrigger = (message) => {
     return message.startsWith("Hey ChatGPT...");
   };
@@ -132,7 +146,7 @@ const AblyChatComponent = () => {
         <textarea
           ref={(element) => { inputBox = element; }}
           value={messageText}
-          placeholder="Type a message! Prompt ChatGPT with 'Hey ChatGPT...' before asking your question"
+          placeholder="Type a message!"
           onChange={e => setMessageText(e.target.value)}
           onKeyDown={handleKeyPress}
           className={styles.textarea}
