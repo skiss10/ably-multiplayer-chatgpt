@@ -110,15 +110,8 @@ const AblyChatComponent = () => {
     // Set the font color based on the message author.
     const fontColor = author === "me" ? "#FFFFFF" : "#000000";
   
-    // Set the alignment based on the message author.
-    const justifyContent = author === "me" ? "flex-end" : "flex-start";
-  
     return (
-      <div
-        key={index}
-        className={styles.messageWrapper}
-        style={{ justifyContent: justifyContent }}
-      >
+      <div key={index} className={styles.messageWrapper}>
         <div
           className={styles.colorSquare}
           style={{ backgroundColor: message.data.color }}
@@ -132,6 +125,10 @@ const AblyChatComponent = () => {
         </span>
       </div>
     );
+  });
+
+  useEffect(() => {
+    messageEnd?.scrollIntoView({ behavior: "smooth" });
   });
 
   useEffect(() => {
