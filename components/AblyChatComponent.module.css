@@ -63,3 +63,13 @@
     height: 10px;
     margin-right: 5px;
   }
+
+  .messageSentByMe {
+    /* Add styles specific to messages sent by the current user */
+    justify-content: flex-end;
+  }
+  
+  .messageSentByOthers {
+    /* Add styles specific to messages sent by other users */
+    justify-content: flex-start;
+  }

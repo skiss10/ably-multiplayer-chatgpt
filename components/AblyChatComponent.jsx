@@ -102,37 +102,37 @@ const AblyChatComponent = () => {
     event.preventDefault();
   };
 
-  const messages = receivedMessages.map((message, index) => {
-    const author = message.connectionId === ably.connection.id ? "me" : "other";
-    const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
-    const className = isGPTMessage ? styles.chatGPTMessage : styles.message;
-  
-    // Set the font color based on the message author.
-    const fontColor = author === "me" ? "#FFFFFF" : "#000000";
-  
-    // Set the alignment based on the message author.
-    const justifyContent = author === "me" ? "flex-end" : "flex-start";
-  
-    return (
+const messages = receivedMessages.map((message, index) => {
+  const author = message.connectionId === ably.connection.id ? "me" : "other";
+  const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
+  const className = isGPTMessage ? styles.chatGPTMessage : styles.message;
+
+  // Set the font color based on the message author.
+  const fontColor = author === "me" ? "#FFFFFF" : "#000000";
+
+  // Set the alignment based on the message author.
+  const justifyContent = author === "me" ? "flex-end" : "flex-start";
+
+  return (
+    <div
+      key={index}
+      className={`${styles.messageWrapper} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`}
+      style={{ justifyContent: justifyContent }}
+    >
       <div
-        key={index}
-        className={`${styles.messageWrapper} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`}
-        style={{ justifyContent: justifyContent }}
+        className={styles.colorSquare}
+        style={{ backgroundColor: message.data.color }}
+      ></div>
+      <span
+        className={className}
+        data-author={author}
+        style={{ color: fontColor }}
       >
-        <div
-          className={styles.colorSquare}
-          style={{ backgroundColor: message.data.color }}
-        ></div>
-        <span
-          className={className}
-          data-author={author}
-          style={{ color: fontColor }}
-        >
-          {message.data.text}
-        </span>
-      </div>
-    );
-  });
+        {message.data.text}
+      </span>
+    </div>
+  );
+});
 
   useEffect(() => {
     messageEnd?.scrollIntoView({ behavior: "smooth" });
