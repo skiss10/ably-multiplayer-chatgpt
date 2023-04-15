@@ -1,46 +1,40 @@
-// Import the required dependencies
 import Ably from "ably/promises";
 import { useEffect } from 'react'
 
-// Initialize the Ably Realtime instance with the auth URL
 const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
 
-// Define the useChannel custom hook
-export function useChannel(channelName, callbackOnMessage) {
-    // Get the chat channel and chatGPT channel from the Ably instance
+export function useChannel(channelName, callbackOnMessage, fetchHistory = null) {
     const chatChannel = ably.channels.get(channelName);
-    const chatGPTChannel = ably.channels.get('chat-gpt');
 
-    // Define the onMount function that will be called when the hook is mounted
+    const fetchChannelHistory = async () => {
+        try {
+            const historyPage = await chatChannel.history({ limit: fetchHistory });
+            historyPage.items.reverse().forEach((msg) => {
+                callbackOnMessage(msg);
+            });
+        } catch (error) {
+            console.error('Error fetching channel history:', error);
+        }
+    };
+
     const onMount = () => {
-        // Subscribe to messages from the chat channel and call the provided callback
+        if (fetchHistory !== null) {
+            fetchChannelHistory();
+        }
         chatChannel.subscribe(msg => { callbackOnMessage(msg); });
-
-        // Subscribe to messages from the chatGPT channel, fetch the response,
-        // and call the provided callback with the response
-        chatGPTChannel.subscribe(async msg => {
-            const response = await fetchChatGPTResponse(msg);
-            callbackOnMessage(response);
-        });
     }
 
-    // Define the onUnmount function that will be called when the hook is unmounted
     const onUnmount = () => {
-        // Unsubscribe from the chat channel and chatGPT channel
         chatChannel.unsubscribe();
-        chatGPTChannel.unsubscribe();
     }
 
-    // Define the useEffectHook that will be passed to the useEffect function
     const useEffectHook = () => {
         onMount();
         return () => { onUnmount(); };
     };
 
-    // Use the useEffect hook with the useEffectHook function
     useEffect(useEffectHook);
 
-    // Return the chat channel and the Ably instance
     return [chatChannel, ably];
 }
 
