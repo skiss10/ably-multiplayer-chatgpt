@@ -110,11 +110,15 @@ const AblyChatComponent = () => {
     // Set the font color based on the message author.
     const fontColor = author === "me" ? "#FFFFFF" : "#000000";
   
-    // Choose the appropriate wrapper class based on the message author.
-    const wrapperClass = author === "me" ? styles.messageSentByMe : styles.messageSentByOthers;
+    // Set the alignment based on the message author.
+    const justifyContent = author === "me" ? "flex-end" : "flex-start";
   
     return (
-      <div key={index} className={wrapperClass}>
+      <div
+        key={index}
+        className={styles.messageWrapper}
+        style={{ justifyContent: justifyContent }}
+      >
         <div
           className={styles.colorSquare}
           style={{ backgroundColor: message.data.color }}
@@ -122,7 +126,7 @@ const AblyChatComponent = () => {
         <span
           className={className}
           data-author={author}
-          style={{ color: fontColor }} // Use the fontColor variable here
+          style={{ color: fontColor }}
         >
           {message.data.text}
         </span>
