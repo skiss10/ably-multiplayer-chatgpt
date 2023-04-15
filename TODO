@@ -1,0 +1,5 @@
+1) Add an architecture of Ably channels
+
+2) Regarding the two new features:
+
+Ably's channel rewind feature: This feature allows new subscribers to retrieve a specific number of messages from the channel's history when they join. You can enable the rewind feature by modifying the useChannel hook to include the rewind parameter when subscribing to the channel (e.g., ably.channels.get(channelName, { params: { rewind: '50' } })). You would also need to handle the messages returned by the rewind feature and display them in the chat component.
