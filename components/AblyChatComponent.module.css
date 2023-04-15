@@ -65,11 +65,13 @@
   }
 
   .messageSentByMe {
-    /* Add styles specific to messages sent by the current user */
+    display: flex;
     justify-content: flex-end;
+    margin-bottom: 10px;
   }
   
   .messageSentByOthers {
-    /* Add styles specific to messages sent by other users */
+    display: flex;
     justify-content: flex-start;
+    margin-bottom: 10px;
   }
