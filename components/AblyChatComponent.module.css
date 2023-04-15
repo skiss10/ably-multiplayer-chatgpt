@@ -64,7 +64,7 @@
     margin-right: 5px;
   }
 
-  .messageSentByMe {
+  /* .messageSentByMe {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 10px;
@@ -74,4 +74,4 @@
     display: flex;
     justify-content: flex-start;
     margin-bottom: 10px;
-  }
+  } */
