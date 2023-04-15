@@ -110,8 +110,11 @@ const AblyChatComponent = () => {
     // Set the font color based on the message author.
     const fontColor = author === "me" ? "#FFFFFF" : "#000000";
   
+    // Choose the appropriate wrapper class based on the message author.
+    const wrapperClass = author === "me" ? styles.messageSentByMe : styles.messageSentByOthers;
+  
     return (
-      <div key={index} className={styles.messageWrapper}>
+      <div key={index} className={wrapperClass}>
         <div
           className={styles.colorSquare}
           style={{ backgroundColor: message.data.color }}
