@@ -3,40 +3,26 @@ import { useEffect } from 'react'
 
 const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
 
-export function useChannel(channelName, callbackOnMessage, fetchHistory = null) {
+export function useChannel(channelName, callbackOnMessage) {
     const chatChannel = ably.channels.get(channelName);
-
-    const fetchChannelHistory = async () => {
-        try {
-            const historyPage = await chatChannel.history({ limit: fetchHistory });
-            historyPage.items.reverse().forEach((msg) => {
-                callbackOnMessage(msg);
-            });
-        } catch (error) {
-            console.error('Error fetching channel history:', error);
-        }
-    };
-
+  
     const onMount = () => {
-        if (fetchHistory !== null) {
-            fetchChannelHistory();
-        }
-        chatChannel.subscribe(msg => { callbackOnMessage(msg); });
+      chatChannel.subscribe(msg => { callbackOnMessage(msg); });
     }
-
+  
     const onUnmount = () => {
-        chatChannel.unsubscribe();
+      chatChannel.unsubscribe();
     }
-
+  
     const useEffectHook = () => {
-        onMount();
-        return () => { onUnmount(); };
+      onMount();
+      return () => { onUnmount(); };
     };
-
+  
     useEffect(useEffectHook);
-
+  
     return [chatChannel, ably];
-}
+  }
 
 // Define the fetchChatGPTResponse function that sends a request to the API
 // and returns the message object with the ChatGPT response data
