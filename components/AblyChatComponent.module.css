@@ -64,3 +64,15 @@
     margin-right: 5px;
   }
   
+  .messageSentByMe {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+  
+  .messageSentByOthers {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+  }
+  
