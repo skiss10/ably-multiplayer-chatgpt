@@ -105,7 +105,8 @@ const AblyChatComponent = () => {
 const messages = receivedMessages.map((message, index) => {
   const author = message.connectionId === ably.connection.id ? "me" : "other";
   const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
-  const className = isGPTMessage ? styles.chatGPTMessage : styles.message;
+  const className = `${isGPTMessage ? styles.chatGPTMessage : styles.message} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`;
+
 
   // Set the font color based on the message author.
   const fontColor = author === "me" ? "#FFFFFF" : "#000000";
