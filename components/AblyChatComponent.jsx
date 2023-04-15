@@ -94,7 +94,7 @@ const AblyChatComponent = () => {
     sendChatMessage(messageText);
   };
 
-  const handleKeyPress = (event) => {
+  const handleKeyUp = (event) => {
     if (event.key !== 'Enter' || messageTextIsEmpty) {
       return;
     }
@@ -156,7 +156,7 @@ const messages = receivedMessages.map((message, index) => {
           value={messageText}
           placeholder="Type a message!"
           onChange={e => setMessageText(e.target.value)}
-          onKeyDown={handleKeyPress}
+          onKeyUp={handleKeyUp}
           className={styles.textarea}
         ></textarea>
         <button type="submit" className={styles.button} disabled={messageTextIsEmpty}>Send</button>
