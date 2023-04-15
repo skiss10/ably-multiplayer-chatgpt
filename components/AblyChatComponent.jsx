@@ -20,19 +20,19 @@ const AblyChatComponent = () => {
     setMessages([...history, message]);
   });
 
-  // useEffect(() => {
-  //   const fetchChannelHistory = async () => {
-  //     try {
-  //       const historyPage = await channel.history({ limit: 20 });
-  //       const historyMessages = historyPage.items.reverse();
-  //       setMessages(receivedMessages => [...receivedMessages, ...historyMessages]);
-  //     } catch (error) {
-  //       console.error('Error fetching channel history:', error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchChannelHistory = async () => {
+      try {
+        const historyPage = await channel.history({ limit: 20 });
+        const historyMessages = historyPage.items.reverse();
+        setMessages(receivedMessages => [...receivedMessages, ...historyMessages]);
+      } catch (error) {
+        console.error('Error fetching channel history:', error);
+      }
+    };
 
-  //   fetchChannelHistory();
-  // }, [channel]);
+    fetchChannelHistory();
+  }, [channel]);
 
   const isChatGPTTrigger = (message) => {
     return message.startsWith("Hey ChatGPT...");
