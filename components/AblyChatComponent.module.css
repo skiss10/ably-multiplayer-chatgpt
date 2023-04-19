@@ -58,9 +58,14 @@
   }
   
   .colorSquare {
-    width: 10px;
-    height: 10px;
+    width: 24px; /* Adjust this value according to your desired size */
+    height: 24px; /* Adjust this value according to your desired size */
     margin-right: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 50%; /* Added to create a circular shape */
   }
 
   .messageSentByMe {

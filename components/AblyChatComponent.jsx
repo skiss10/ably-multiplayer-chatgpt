@@ -14,6 +14,14 @@ const AblyChatComponent = () => {
   const [userColor, setUserColor] = useState(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
   );
+  const [userInitials, setUserInitials] = useState(generateRandomInitials());
+
+  function generateRandomInitials() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const firstInitial = chars[Math.floor(Math.random() * chars.length)];
+    const secondInitial = chars[Math.floor(Math.random() * chars.length)];
+    return firstInitial + secondInitial;
+  }
 
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
@@ -61,7 +69,7 @@ const AblyChatComponent = () => {
   
     channel.publish({
       name: "chat-message",
-      data: { text: `ChatGPT: ${chatGPTResponse}`, color: userColor },
+      data: { text: messageText, color: userColor, initials: userInitials },
     });
   } catch (error) {
     console.error("Error fetching ChatGPT response:", error);
@@ -123,7 +131,9 @@ const messages = receivedMessages.map((message, index) => {
       <div
         className={styles.colorSquare}
         style={{ backgroundColor: message.data.color }}
-      ></div>
+      >
+        {author === "me" ? userInitials : message.data.initials}
+      </div>
       <span
         className={className}
         data-author={author}
