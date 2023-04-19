@@ -66,6 +66,7 @@
     align-items: center;
     font-weight: bold;
     border-radius: 50%; /* Added to create a circular shape */
+    font-size: 0.8em; /* Adjust this value according to your desired size */
   }
 
   .messageSentByMe {

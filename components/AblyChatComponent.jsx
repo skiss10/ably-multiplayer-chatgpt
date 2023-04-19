@@ -23,6 +23,15 @@ const AblyChatComponent = () => {
     return firstInitial + secondInitial;
   }
 
+  function getContrastTextColor(color) {
+    const hexColor = color.replace("#", "");
+    const red = parseInt(hexColor.substr(0, 2), 16);
+    const green = parseInt(hexColor.substr(2, 2), 16);
+    const blue = parseInt(hexColor.substr(4, 2), 16);
+    const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+    return brightness > 128 ? "black" : "white";
+  }
+
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
     setMessages([...history, message]);
@@ -69,7 +78,7 @@ const AblyChatComponent = () => {
   
     channel.publish({
       name: "chat-message",
-      data: { text: messageText, color: userColor, initials: userInitials },
+      data: { text: chatGPTResponse, color: userColor, initials: userInitials },
     });
   } catch (error) {
     console.error("Error fetching ChatGPT response:", error);
@@ -84,7 +93,7 @@ const AblyChatComponent = () => {
     // Publish the original message to the channel first.
     channel.publish({
       name: "chat-message",
-      data: { text: messageText, color: userColor },
+      data: { text: messageText, color: userColor, initials: userInitials },
     });
 
     if (isChatGPTTrigger(messageText)) {
@@ -113,6 +122,7 @@ const AblyChatComponent = () => {
 const messages = receivedMessages.map((message, index) => {
   const author = message.connectionId === ably.connection.id ? "me" : "other";
   const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
+  const textColor = getContrastTextColor(message.data.color);
   const className = `${isGPTMessage ? styles.chatGPTMessage : styles.message} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`;
 
 
@@ -130,7 +140,7 @@ const messages = receivedMessages.map((message, index) => {
     >
       <div
         className={styles.colorSquare}
-        style={{ backgroundColor: message.data.color }}
+        style={{ backgroundColor: message.data.color, color: textColor }}
       >
         {author === "me" ? userInitials : message.data.initials}
       </div>
