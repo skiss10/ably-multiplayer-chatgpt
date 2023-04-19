@@ -74,7 +74,7 @@ const AblyChatComponent = () => {
       const data = await response.json();
 
     // Extract the chatGPTResponse from the data object
-    const chatGPTResponse = data.response;
+    const chatGPTResponse = "GPT: " + data.response;
   
     channel.publish({
       name: "chat-message",
