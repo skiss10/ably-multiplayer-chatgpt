@@ -165,7 +165,7 @@ const messages = receivedMessages.map((message, index) => {
         {messages}
         {fetchingopenaiResponse && (
           <span className={styles.fetchingMessage}>
-            Fetching response from openai...
+            Fetching response from OpenAI...
           </span>
         )}
         <div ref={(element) => { messageEnd = element; }}></div>
