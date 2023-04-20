@@ -1,16 +1,15 @@
-# Building a Realtime Chat App with ChatGPT using Next.js, Ably, and Vercel
+# Building a Multiplayer Chat App with OpenAI Next.js, Ably, and Vercel
 
 https://next-js-chat-app.vercel.app/
 
-This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates OpenAI's ChatGPT to enhance user experience and provide AI-powered chat assistance.
+This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates OpenAI's completion API to enhance user experience and provide AI-powered chat assistance.
 
 You'll learn how to - 
 * Create a brand new Next.js application
 * Create an Ably account and get an API key
 * Create a Next.js Vercel Serverless API
 * Use React Functional components and React Hooks with Ably
-* Integrate ChatGPT with your chat application
-* Use ChatGPT to provide AI-powered responses and assistance within the chat
+* Integrate OpenAI's completion API with your chat application
 * Host your app on Vercel
 
 
@@ -22,9 +21,9 @@ You'll learn how to -
 
 [React](https://reactjs.org/) is a JavaScript library for building user interfaces with encapsulated components that manage their own state.
 
-[OpenAI](https://www.openai.com/) is an artificial intelligence research lab that develops cutting-edge AI models like ChatGPT, designed to understand and generate human-like text based on user input.
+[OpenAI](https://www.openai.com/) is an artificial intelligence research lab that develops cutting-edge AI models like openai, designed to understand and generate human-like text based on user input.
 
-[ChatGPT](https://platform.openai.com/docs/guides/chat/overview) is a powerful language model built on OpenAI's GPT architecture. It can be used to create engaging and context-aware chatbots, generate text, answer questions, and much more.
+[openai](https://platform.openai.com/docs/guides/chat/overview) is a powerful language model built on OpenAI's GPT architecture. It can be used to create engaging and context-aware chatbots, generate text, answer questions, and much more.
 
 # WebSockets in Vercel with Ably
 
@@ -37,13 +36,13 @@ Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/ser
 ![The UI of the chat app we'll build. It is a window with speech bubbles for text.](https://cdn.glitch.com/0cb30add-c9ef-4c00-983c-e12deb0d4080%2Fchatapp.png?v=1612279601157)  
 *The UI of the app we'll build with this walkthrough*  
 
-We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a Next.js serverless function which will be used to connect to Ably. Further, users of the chat application will be able to query ChatGPT and prompt it to share responses in the group chat.
+We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a Next.js serverless function which will be used to connect to Ably. Further, users of the chat application will be able to query openai and prompt it to share responses in the group chat.
 
-# How to prompt ChatGPT?
+# How to prompt openai?
 
-It's as simple as following whatever prompt you want to provide to ChatGPT with "Hey ChatGPT... 'prompt'". So if you want to ask ChatGPT about Tony Stark, you would publish the following into the chat:
+It's as simple as following whatever prompt you want to provide to openai with "Hey openai... 'prompt'". So if you want to ask openai about Tony Stark, you would publish the following into the chat:
 
-Hey ChatGPT... Who is Tony Stark?
+Hey openai... Who is Tony Stark?
 
 TODO - add image
 
@@ -54,7 +53,7 @@ In order to build this app, you will need:
 * **An Ably account** for sending messages: [Create an account with Ably for free](https://www.ably.io/signup).
 * **A Vercel Account** for hosting on production: [Create an account with Vercel for free](https://vercel.com/signup).
 * **Node 12** (LTS) or greater: [Install Node](https://nodejs.org/en/).
-* **An OpenAI account** for accessing ChatGPT: [Create an account with OpenAI for free](https://beta.openai.com/signup). Note that while API usage during the trial period is free, you may need to upgrade to a paid plan for continued access.
+* **An OpenAI account** for accessing openai: [Create an account with OpenAI for free](https://beta.openai.com/signup). Note that while API usage during the trial period is free, you may need to upgrade to a paid plan for continued access.
 
 ## Local dev pre-requirements
 
@@ -139,14 +138,14 @@ The topology of our Next.js app will look like this:
 │    │   
 │    └─── api
 │          └─ createTokenRequest.js
-│          └─ chatgpt.js
+│          └─ openai.js
 │           
 └─── public
 ```
 
 * `/pages/index.js` is the home page
 * `/api/createTokenRequest.js` is our Ably token authentication API
-* `/api/chatgpt.js` is our OpenAI Completion API 
+* `/api/openai.js` is our OpenAI Completion API 
 * `/components/AblyChatComponent.jsx` is the chat component
 * `/components/AblyChatComponent.module.css` contains the styles for the chat component
 * `/components/AblyReactEffect.js` is the Ably React Hook.
@@ -245,13 +244,13 @@ Next, set up the state properties that we'll use in the component:
 ```jsx
   const [messageText, setMessageText] = useState("");
   const [receivedMessages, setMessages] = useState([]);
-  const [fetchingChatGPTResponse, setFetchingChatGPTResponse] = useState(false);
+  const [fetchingopenaiResponse, setFetchingopenaiResponse] = useState(false);
   const messageTextIsEmpty = messageText.trim().length === 0;
 ```
 
 * **messageText** will be bound to textarea element where messages can be typed
 * **receiveMessages** to the on screen chat history
-* **setFetchingChatGPTResponse** A boolean state variable that indicates whether the ChatGPT response is being fetched or not. This is used to display a loading indicator or handle any UI changes during the API call.
+* **setFetchingopenaiResponse** A boolean state variable that indicates whether the openai response is being fetched or not. This is used to display a loading indicator or handle any UI changes during the API call.
 * **messageTextIsEmpty** is used to disable the send button when the textarea is empty
 
 Now we'll make use of the `useChannel` hook that we imported earlier.
@@ -272,20 +271,20 @@ Now we'll make use of the `useChannel` hook that we imported earlier.
   });
 ```
 
-Now, let's discuss the ChatGPT integration and how messages are handled.
+Now, let's discuss the openai integration and how messages are handled.
 
-We have two additional functions: isChatGPTTrigger and sendChatGPTResponse. The former checks if a message should trigger a ChatGPT response, while the latter triggers a vercel lembda to send a request to the OpenAI API, receives the response, and publishes it to the chat.
+We have two additional functions: isopenaiTrigger and sendopenaiResponse. The former checks if a message should trigger a openai response, while the latter triggers a vercel lembda to send a request to the OpenAI API, receives the response, and publishes it to the chat.
 
 ```jsx
-  const isChatGPTTrigger = (message) => {
-    return message.startsWith("Hey ChatGPT...");
+  const isopenaiTrigger = (message) => {
+    return message.startsWith("Hey openai...");
   }; 
 
-  const sendChatGPTResponse = async (messageText) => {
+  const sendopenaiResponse = async (messageText) => {
     try {
-      setFetchingChatGPTResponse(true);
+      setFetchingopenaiResponse(true);
 
-      const response = await fetch('/api/chatgpt', {
+      const response = await fetch('/api/openai', {
         method: 'POST',
         body: JSON.stringify({ prompt: messageText }), // Use messageText instead of msg.data
         headers: { 'Content-Type': 'application/json' },
@@ -299,19 +298,19 @@ We have two additional functions: isChatGPTTrigger and sendChatGPTResponse. The 
     // Parse the JSON response
       const data = await response.json();
 
-      // Extract the chatGPTResponse from the data object
-      const chatGPTResponse = data.response;
+      // Extract the openaiResponse from the data object
+      const openaiResponse = data.response;
     
       channel.publish({
         name: "chat-message",
-        data: `ChatGPT: ${chatGPTResponse}`,
+        data: `openai: ${openaiResponse}`,
       });
     } catch (error) {
-      console.error("Error fetching ChatGPT response:", error);
+      console.error("Error fetching openai response:", error);
     
       // Add error handling here
     } finally {
-      setFetchingChatGPTResponse(false);
+      setFetchingopenaiResponse(false);
     }
   };
 ```
@@ -350,23 +349,23 @@ In addition, the `handleKeyPress` event is wired up to make sure that if a user 
   };
 ```
 
-Next, we need to construct the UI elements to display the messages, including ChatGPT responses. To do this, we will map the received Ably messages into HTML span elements:
+Next, we need to construct the UI elements to display the messages, including openai responses. To do this, we will map the received Ably messages into HTML span elements:
 
 In this updated code, we first identify the author of the message by comparing the message.connectionId with ably.connection.id. If they match, the author is "me" (the current user); otherwise, it's "other" (another user).
 
-We then check if the message is a ChatGPT response by looking for the "ChatGPT: " prefix using startsWith.
+We then check if the message is a openai response by looking for the "openai: " prefix using startsWith.
 
-Based on whether the message is a ChatGPT response or not, we assign the appropriate CSS class to the className variable. For ChatGPT messages, we use the styles.chatGPTMessage class, and for regular messages, we use the styles.message class.
+Based on whether the message is a openai response or not, we assign the appropriate CSS class to the className variable. For openai messages, we use the styles.openaiMessage class, and for regular messages, we use the styles.message class.
 
 Finally, we return a span element with the determined key, className, and data-author attributes, and display the message content using {message.data}.
 
 ```jsx
   const messages = receivedMessages.map((message, index) => {
     const author = message.connectionId === ably.connection.id ? "me" : "other";
-    const isGPTMessage = message.data.startsWith("ChatGPT: ");
+    const isGPTMessage = message.data.startsWith("openai: ");
 
     const className = isGPTMessage
-      ? styles.chatGPTMessage
+      ? styles.openaiMessage
       : styles.message;
 
     return (
@@ -408,9 +407,9 @@ The returned markup will look like this:
     <div className={styles.chatHolder}>
       <div className={styles.chatText}>
         {messages}
-        {fetchingChatGPTResponse && (
+        {fetchingopenaiResponse && (
           <span className={styles.fetchingMessage}>
-            Fetching response from ChatGPT...
+            Fetching response from openai...
           </span>
         )}
         <div ref={(element) => { messageEnd = element; }}></div>
@@ -437,10 +436,10 @@ Right at the bottom of the file, the function is exported as `AblyChatComponent`
 
 ## Use a Vercel Lambda to query OpenAI
 
-Now we need to define a serverless function for our Next.js application that communicates with the OpenAI API to generate text completions using a ChatGPT model. It extracts a prompt from the request body, sends it to the API, and returns the generated text in a JSON response. In case of errors, it logs the error message and sends a JSON response with the error details and a 500 status code.
+Now we need to define a serverless function for our Next.js application that communicates with the OpenAI API to generate text completions using a openai model. It extracts a prompt from the request body, sends it to the API, and returns the generated text in a JSON response. In case of errors, it logs the error message and sends a JSON response with the error details and a 500 status code.
 
 ```jsx
-// /api/chatgpt.js
+// /api/openai.js
 import { Configuration, OpenAIApi } from 'openai';
 
 const configuration = new Configuration({
@@ -459,15 +458,15 @@ export default async (req, res) => {
         temperature: 0.6,
       });
 
-    const chatGPTResponse = completion.data.choices[0].text;
+    const openaiResponse = completion.data.choices[0].text;
 
-    console.log(chatGPTResponse)
+    console.log(openaiResponse)
     console.log("hit serverless function")
 
-    res.status(200).json({ response: chatGPTResponse });
+    res.status(200).json({ response: openaiResponse });
   } catch (error) {
-    console.error('Error fetching ChatGPT response:', error);
-    res.status(500).json({ error: `Error fetching ChatGPT response: ${error.message}`, details: error });
+    console.error('Error fetching openai response:', error);
+    res.status(500).json({ error: `Error fetching openai response: ${error.message}`, details: error });
   }
 };
 ```
@@ -496,10 +495,10 @@ const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
 Instancing the Ably library outside the scope of the component will mean it is only created once and will keep your limit usage down.
 
 We then need to create the function we're going to export - our custom Hook, so that we can use it in our components.
-We'll call it useChannel and it will require the channel name, and a callback as arguments. Each time useChannel is called, we get the requested channel from the Ably-JS SDK and prepare the hook functions. Additionally, we create a separate channel for ChatGPT messages.
+We'll call it useChannel and it will require the channel name, and a callback as arguments. Each time useChannel is called, we get the requested channel from the Ably-JS SDK and prepare the hook functions. Additionally, we create a separate channel for openai messages.
 
-* **onMount** is the code run each time our component is rendered. Inside onMount, we will subscribe to the specified chat channel, triggering `callbackOnMessage` whenever a message is received. We also subscribe to the ChatGPT channel, fetch the response, and call the provided callback with the response.
-* **onUnmount** is the code run whenever the component is unmounted before it is re-rendered. Here we will unsubscribe from both the chat channel and ChatGPT channel, which will stop accidental multiples of connections, again saving our account limits.
+* **onMount** is the code run each time our component is rendered. Inside onMount, we will subscribe to the specified chat channel, triggering `callbackOnMessage` whenever a message is received. We also subscribe to the openai channel, fetch the response, and call the provided callback with the response.
+* **onUnmount** is the code run whenever the component is unmounted before it is re-rendered. Here we will unsubscribe from both the chat channel and openai channel, which will stop accidental multiples of connections, again saving our account limits.
 * **useEffectHook** is a function that calls these functions correctly, returning onUnmount for React to use.
 
 The exported Hook in `AblyReactEffect.js` will look like this: 
@@ -507,28 +506,28 @@ The exported Hook in `AblyReactEffect.js` will look like this:
 ```js
 // Define the useChannel custom hook
 export function useChannel(channelName, callbackOnMessage) {
-    // Get the chat channel and chatGPT channel from the Ably instance
+    // Get the chat channel and openai channel from the Ably instance
     const chatChannel = ably.channels.get(channelName);
-    const chatGPTChannel = ably.channels.get('chat-gpt');
+    const openaiChannel = ably.channels.get('chat-gpt');
 
     // Define the onMount function that will be called when the hook is mounted
     const onMount = () => {
         // Subscribe to messages from the chat channel and call the provided callback
         chatChannel.subscribe(msg => { callbackOnMessage(msg); });
 
-        // Subscribe to messages from the chatGPT channel, fetch the response,
+        // Subscribe to messages from the openai channel, fetch the response,
         // and call the provided callback with the response
-        chatGPTChannel.subscribe(async msg => {
-            const response = await fetchChatGPTResponse(msg);
+        openaiChannel.subscribe(async msg => {
+            const response = await fetchopenaiResponse(msg);
             callbackOnMessage(response);
         });
     }
 
     // Define the onUnmount function that will be called when the hook is unmounted
     const onUnmount = () => {
-        // Unsubscribe from the chat channel and chatGPT channel
+        // Unsubscribe from the chat channel and openai channel
         chatChannel.unsubscribe();
-        chatGPTChannel.unsubscribe();
+        openaiChannel.unsubscribe();
     }
 
     // Define the useEffectHook that will be passed to the useEffect function
@@ -547,15 +546,15 @@ export function useChannel(channelName, callbackOnMessage) {
 
 The `useChannel` Hook returns both the current Ably channel and the Ably SDK for the calling code to use to send messages. This hook encapsulates Ably pub/sub for React functional components in one place, so we don't need to worry about it elsewhere, and the code that uses it can just process the messages it receives.
 
-Finally, we create the `fetchChatGPTResponse` function - an asynchronous utility that sends a request to the ChatGPT API and processes the response. It takes a message object as input, sends a POST request to the API using the message data as the prompt, and returns the updated message object with the ChatGPT response data. In case of an error, it logs the error and returns the message object with an error message.
+Finally, we create the `fetchopenaiResponse` function - an asynchronous utility that sends a request to the openai API and processes the response. It takes a message object as input, sends a POST request to the API using the message data as the prompt, and returns the updated message object with the openai response data. In case of an error, it logs the error and returns the message object with an error message.
 
 ```jsx
-// Define the fetchChatGPTResponse function that sends a request to the API
-// and returns the message object with the ChatGPT response data
-async function fetchChatGPTResponse(msg) {
+// Define the fetchopenaiResponse function that sends a request to the API
+// and returns the message object with the openai response data
+async function fetchopenaiResponse(msg) {
     try {
         // Send a POST request to the API with the message data as the prompt
-        const response = await fetch('/api/chatgpt', {
+        const response = await fetch('/api/openai', {
             method: 'POST',
             body: JSON.stringify({ prompt: msg.data }),
             headers: { 'Content-Type': 'application/json' }
@@ -569,13 +568,13 @@ async function fetchChatGPTResponse(msg) {
         // Parse the JSON response
         const data = await response.json();
 
-        // Return the message object with the ChatGPT response data
-        return { ...msg, data: `ChatGPT: ${data.response}` };
+        // Return the message object with the openai response data
+        return { ...msg, data: `openai: ${data.response}` };
     } catch (error) {
-        console.error("Error fetching ChatGPT response:", error);
+        console.error("Error fetching openai response:", error);
 
         // Return the message object with an error message
-        return { ...msg, data: `ChatGPT: Error fetching response - ${error.message}` };
+        return { ...msg, data: `openai: Error fetching response - ${error.message}` };
     }
 }
 ```

@@ -1,4 +1,4 @@
-// /api/chatgpt.js
+// /api/openai.js
 import { Configuration, OpenAIApi } from 'openai';
 
 const configuration = new Configuration({
@@ -18,14 +18,14 @@ export default async (req, res) => {
         temperature: 0.6,
       });
 
-    const chatGPTResponse = completion.data.choices[0].text;
+    const openaiResponse = completion.data.choices[0].text;
 
-    console.log(chatGPTResponse)
+    console.log(openaiResponse)
     console.log("hit serverless function")
 
-    res.status(200).json({ response: chatGPTResponse });
+    res.status(200).json({ response: openaiResponse });
   } catch (error) {
-    console.error('Error fetching ChatGPT response:', error);
-    res.status(500).json({ error: `Error fetching ChatGPT response: ${error.message}`, details: error });
+    console.error('Error fetching openai response:', error);
+    res.status(500).json({ error: `Error fetching openai response: ${error.message}`, details: error });
   }
 };
