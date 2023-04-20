@@ -168,10 +168,12 @@ const AblyChatComponent = () => {
   );
 });
 
+  // Scroll to the most recent message.
   useEffect(() => {
     messageEnd?.scrollIntoView({ behavior: "smooth" });
   });
 
+  // Render the chat interface.
   return (
     <div className={styles.chatHolder}>
       <div className={styles.chatText}>

@@ -549,76 +549,17 @@ Our next step is to determine if a message is an OpenAI prompt that needs to be 
 };
 ```
 
-Now, let's discuss the openai integration and how messages are handled.
-
-We have two additional functions: isopenaiTrigger and sendopenaiResponse. The former checks if a message should trigger a openai response, while the latter triggers a vercel lembda to send a request to the OpenAI API, receives the response, and publishes it to the chat.
+After this, we need to create some event handlers to send chat messages. The `handleFormSubmission`, is triggered when the `submit` button is clicked and calls `sendChatMessage`, along with preventing a page reload. The `handleKeyUp` event is wired up to ensure that submissions of text call `sendChatMessage`.
 
 ```jsx
-  const isopenaiTrigger = (message) => {
-    return message.startsWith("Hey openai...");
-  }; 
-
-  const sendopenaiResponse = async (messageText) => {
-    try {
-      setFetchingopenaiResponse(true);
-
-      const response = await fetch('/api/openai', {
-        method: 'POST',
-        body: JSON.stringify({ prompt: messageText }), // Use messageText instead of msg.data
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      // Check if the response is ok (status code in the 200-299 range)
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-    // Parse the JSON response
-      const data = await response.json();
-
-      // Extract the openaiResponse from the data object
-      const openaiResponse = data.response;
-    
-      channel.publish({
-        name: "chat-message",
-        data: `openai: ${openaiResponse}`,
-      });
-    } catch (error) {
-      console.error("Error fetching openai response:", error);
-    
-      // Add error handling here
-    } finally {
-      setFetchingopenaiResponse(false);
-    }
-  };
-```
-
-Next, we need to handle the UI interactions by defining a few functions.
-
-First, there's `sendChatMessage`, which is responsible for publishing new messages.
-It uses the Ably Channel returned by the `useChannel` hook, clears the input, and focuses on the textarea so that users can type more messages:
-
-```jsx
-  const sendChatMessage = (messageText) => {
-    channel.publish({ name: "chat-message", data: messageText });
-    setMessageText("");
-    inputBox.focus();
-  }
-```
-
-Then `handleFormSubmission`, which is triggered when the `submit` button is clicked and calls `sendChatMessage`, along with preventing a page reload:
-
-```jsx
+  // Handle form submission and send a chat message.
   const handleFormSubmission = (event) => {
     event.preventDefault();
     sendChatMessage(messageText);
-  }
-```
+  };
 
-In addition, the `handleKeyPress` event is wired up to make sure that if a user presses the `enter` key, while there is text in the textarea, the `sendChatMessage` function is triggered.
-
-```jsx
-  const handleKeyPress = (event) => {
+  // Handle the Enter key and send a chat message.
+  const handleKeyUp = (event) => {
     if (event.key !== 'Enter' || messageTextIsEmpty) {
       return;
     }
@@ -631,63 +572,62 @@ Next, we need to construct the UI elements to display the messages, including op
 
 In this updated code, we first identify the author of the message by comparing the message.connectionId with ably.connection.id. If they match, the author is "me" (the current user); otherwise, it's "other" (another user).
 
-We then check if the message is a openai response by looking for the "openai: " prefix using startsWith.
-
 Based on whether the message is a openai response or not, we assign the appropriate CSS class to the className variable. For openai messages, we use the styles.openaiMessage class, and for regular messages, we use the styles.message class.
 
 Finally, we return a span element with the determined key, className, and data-author attributes, and display the message content using {message.data}.
 
+
 ```jsx
+  // Render messages and handle OpenAI responses.
   const messages = receivedMessages.map((message, index) => {
-    const author = message.connectionId === ably.connection.id ? "me" : "other";
-    const isGPTMessage = message.data.startsWith("openai: ");
+  const author = message.connectionId === ably.connection.id ? "me" : "other";
+  const isGPTMessage = message.data.text.startsWith("openai: ");
+  const textColor = getContrastTextColor(message.data.color);
+  const className = `${isGPTMessage ? styles.openaiMessage : styles.message} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`;
 
-    const className = isGPTMessage
-      ? styles.openaiMessage
-      : styles.message;
 
-    return (
+  // Set the font color based on the message author.
+  const fontColor = author === "me" ? "#FFFFFF" : "#000000";
+
+  // Set the alignment based on the message author.
+  const justifyContent = author === "me" ? "flex-end" : "flex-start";
+
+  return (
+    <div
+      key={index}
+      className={`${styles.messageWrapper} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`}
+      style={{ justifyContent: justifyContent }}
+    >
+      <div
+        className={styles.colorSquare}
+        style={{ backgroundColor: message.data.color, color: textColor }}
+      >
+        {author === "me" ? userInitials : message.data.initials}
+      </div>
       <span
-        key={index}
         className={className}
         data-author={author}
+        style={{ color: fontColor }}
       >
-        {message.data}
+        {message.data.text}
       </span>
-    );
-  });
-```
+    </div>
+  );
+});
 
-In order to keep the message box scrolled to the most recent message (the one on the bottom) we'll need to add an empty div element into the message container, which will then be scrolled into view whenever the components re-renders. This is the element that we'll add to the UI later:
-
-```jsx
-  <div ref={(element) => { messageEnd = element; }}></div>
-```
-
-We use a `useEffect` hook along with [`scrollIntoView()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView) to scroll the message history to the bottom whenever the component renders.
-
-```jsx
+  // Scroll to the most recent message.
   useEffect(() => {
-    messageEnd.scrollIntoView({ behaviour: "smooth" });
+    messageEnd?.scrollIntoView({ behavior: "smooth" });
   });
-```
 
-Finally we will write the React component markup with the event handlers all bound up to `onChange` and `onKeyDown` events in JSX.
-
-The markup itself is just a few div elements and a form with a textarea for user input.
-
-There are two calls to the react `ref` function, which allows us to capture a reference to the elements when they are rendered so that we can interact with them in JavaScript.
-
-The returned markup will look like this:
-
-```jsx
+  // Render the chat interface.
   return (
     <div className={styles.chatHolder}>
       <div className={styles.chatText}>
         {messages}
         {fetchingopenaiResponse && (
           <span className={styles.fetchingMessage}>
-            Fetching response from openai...
+            Fetching response from OpenAI...
           </span>
         )}
         <div ref={(element) => { messageEnd = element; }}></div>
@@ -696,9 +636,9 @@ The returned markup will look like this:
         <textarea
           ref={(element) => { inputBox = element; }}
           value={messageText}
-          placeholder="Type a message..."
+          placeholder="Type a message!"
           onChange={e => setMessageText(e.target.value)}
-          onKeyDown={handleKeyPress}
+          onKeyUp={handleKeyUp}
           className={styles.textarea}
         ></textarea>
         <button type="submit" className={styles.button} disabled={messageTextIsEmpty}>Send</button>
@@ -706,7 +646,6 @@ The returned markup will look like this:
     </div>
   )
 }
-
 export default AblyChatComponent;
 ```
 
@@ -714,39 +653,46 @@ Right at the bottom of the file, the function is exported as `AblyChatComponent`
 
 ## Use a Vercel Lambda to query OpenAI
 
-Now we need to define a serverless function for our Next.js application that communicates with the OpenAI API to generate text completions using a openai model. It extracts a prompt from the request body, sends it to the API, and returns the generated text in a JSON response. In case of errors, it logs the error message and sends a JSON response with the error details and a 500 status code.
+Now we need to define a serverless function for our Next.js application that communicates with the OpenAI API to generate text completions using an openai model. It extracts a prompt from the request body, sends it to the API, and returns the generated text in a JSON response. In case of errors, it logs the error message and sends a JSON response with the error details and a 500 status code.
 
 ```jsx
-// /api/openai.js
+// Import the necessary classes from the OpenAI package
 import { Configuration, OpenAIApi } from 'openai';
 
+// Create a new Configuration object with the API key from the environment variables
 const configuration = new Configuration({
-  apiKey: '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',
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Instantiate a new OpenAIApi object with the configuration
 const openai = new OpenAIApi(configuration);
 
+// Define the default export as an asynchronous function handling an HTTP request and response
 export default async (req, res) => {
   try {
+    // Extract the 'prompt' property from the request body
     const { prompt } = req.body;
 
+    // Call the createCompletion method on the OpenAIApi instance, providing the model, prompt, and temperature
     const completion = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: prompt,
-        temperature: 0.6,
-      });
+      model: "text-davinci-003",
+      prompt: prompt,
+      temperature: 0.6,
+    });
 
+    // Get the first choice's text from the completion response
     const openaiResponse = completion.data.choices[0].text;
 
-    console.log(openaiResponse)
-    console.log("hit serverless function")
-
+    // Set the HTTP response status to 200 (OK) and send the OpenAI response as JSON
     res.status(200).json({ response: openaiResponse });
   } catch (error) {
+    // Log the error message to the console if there is an exception
     console.error('Error fetching openai response:', error);
+    // Set the HTTP response status to 500 (Internal Server Error) and send the error details as JSON
     res.status(500).json({ error: `Error fetching openai response: ${error.message}`, details: error });
   }
 };
+
 ```
 
 ## Using Ably correctly in React Components
@@ -765,9 +711,24 @@ This React Hook is built upon `useEffect`. When referenced, it creates an instan
 
 ```js
 import Ably from "ably/promises";
-import { useEffect } from 'react'
 
-const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
+// Create an async function to handle the request and response
+export default async function handler(req, res) {
+  try {
+
+    // Instantiate Ably client with API key
+    const client = new Ably.Realtime(process.env.ABLY_API_KEY);
+
+    // Generate a token request with a specified client ID
+    const tokenRequestData = await client.auth.createTokenRequest({ clientId: 'ably-nextjs-demo' });
+
+    res.status(200).json(tokenRequestData);
+  } catch (error) {
+    console.error("Error creating Ably token request:", error);
+
+    res.status(500).json({ error: "Failed to create Ably token request" });
+  }
+}
 ```
 
 Instancing the Ably library outside the scope of the component will mean it is only created once and will keep your limit usage down.
@@ -782,80 +743,34 @@ We'll call it useChannel and it will require the channel name, and a callback as
 The exported Hook in `AblyReactEffect.js` will look like this: 
 
 ```js
-// Define the useChannel custom hook
+import Ably from "ably/promises";
+import { useEffect } from 'react'
+
+const ably = new Ably.Realtime.Promise({ authUrl: '/api/createTokenRequest' });
+
 export function useChannel(channelName, callbackOnMessage) {
-    // Get the chat channel and openai channel from the Ably instance
     const chatChannel = ably.channels.get(channelName);
-    const openaiChannel = ably.channels.get('chat-gpt');
-
-    // Define the onMount function that will be called when the hook is mounted
+  
     const onMount = () => {
-        // Subscribe to messages from the chat channel and call the provided callback
-        chatChannel.subscribe(msg => { callbackOnMessage(msg); });
-
-        // Subscribe to messages from the openai channel, fetch the response,
-        // and call the provided callback with the response
-        openaiChannel.subscribe(async msg => {
-            const response = await fetchopenaiResponse(msg);
-            callbackOnMessage(response);
-        });
+      chatChannel.subscribe(msg => { callbackOnMessage(msg); });
     }
-
-    // Define the onUnmount function that will be called when the hook is unmounted
+  
     const onUnmount = () => {
-        // Unsubscribe from the chat channel and openai channel
-        chatChannel.unsubscribe();
-        openaiChannel.unsubscribe();
+      chatChannel.unsubscribe();
     }
-
-    // Define the useEffectHook that will be passed to the useEffect function
+  
     const useEffectHook = () => {
-        onMount();
-        return () => { onUnmount(); };
+      onMount();
+      return () => { onUnmount(); };
     };
-
-    // Use the useEffect hook with the useEffectHook function
+  
     useEffect(useEffectHook);
-
-    // Return the chat channel and the Ably instance
+  
     return [chatChannel, ably];
-}
+  
 ```
 
 The `useChannel` Hook returns both the current Ably channel and the Ably SDK for the calling code to use to send messages. This hook encapsulates Ably pub/sub for React functional components in one place, so we don't need to worry about it elsewhere, and the code that uses it can just process the messages it receives.
-
-Finally, we create the `fetchopenaiResponse` function - an asynchronous utility that sends a request to the openai API and processes the response. It takes a message object as input, sends a POST request to the API using the message data as the prompt, and returns the updated message object with the openai response data. In case of an error, it logs the error and returns the message object with an error message.
-
-```jsx
-// Define the fetchopenaiResponse function that sends a request to the API
-// and returns the message object with the openai response data
-async function fetchopenaiResponse(msg) {
-    try {
-        // Send a POST request to the API with the message data as the prompt
-        const response = await fetch('/api/openai', {
-            method: 'POST',
-            body: JSON.stringify({ prompt: msg.data }),
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        // Check if the response is ok (status code in the 200-299 range)
-        if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        // Parse the JSON response
-        const data = await response.json();
-
-        // Return the message object with the openai response data
-        return { ...msg, data: `openai: ${data.response}` };
-    } catch (error) {
-        console.error("Error fetching openai response:", error);
-
-        // Return the message object with an error message
-        return { ...msg, data: `openai: Error fetching response - ${error.message}` };
-    }
-}
-```
 
 ## Making everything look beautiful with module CSS - `AblyChatComponent.module.css`
 
@@ -894,7 +809,7 @@ In order to deploy your new chat app to Vercel you'll need to:
 2. [Push your app to a GitHub repository](https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/creating-a-new-repository)
 3. [Create a Vercel account](https://vercel.com/signup)
 4. Create a new Vercel app and import your app from your GitHub repository. (This will require you to authorise Vercel to use your GitHub account)
-5. Add your `ABLY_API_KEY` as an environment variable
+5. Add your `ABLY_API_KEY` and `OPENAI_API_KEY` as environment variables
 6. Watch your app deploy
 7. Visit the newly created URL in your browser!
 
