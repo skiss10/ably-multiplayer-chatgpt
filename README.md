@@ -1,4 +1,4 @@
-# Building a Multiplayer Chat App with OpenAI Next.js, Ably, and Vercel
+# Multiplayer Chat App with OpenAI, Next.js, Ably, and Vercel
 
 https://next-js-chat-app.vercel.app/
 
@@ -36,7 +36,7 @@ Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/ser
 
 TODO Update image
 
-We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a twoo Next.js serverless functions which will be used to connect to Ably and retrieve prompt responses from OpenAI.
+We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a two Next.js serverless functions which will be used to connect to Ably and retrieve prompt responses from OpenAI.
 
 # How to prompt openai?
 
