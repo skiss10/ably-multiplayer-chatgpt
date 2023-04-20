@@ -9,7 +9,7 @@ const AblyChatComponent = () => {
 
   const [messageText, setMessageText] = useState("");
   const [receivedMessages, setMessages] = useState([]);
-  const [fetchingChatGPTResponse, setFetchingChatGPTResponse] = useState(false);
+  const [fetchingopenaiResponse, setFetchingopenaiResponse] = useState(false);
   const messageTextIsEmpty = messageText.trim().length === 0;
   const [userColor, setUserColor] = useState(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
@@ -51,15 +51,15 @@ const AblyChatComponent = () => {
     fetchChannelHistory();
   }, [channel]);
 
-  const isChatGPTTrigger = (message) => {
-    return message.startsWith("Hey GPT");
+  const isopenaiTrigger = (message) => {
+    return message.startsWith("Hey OpenAI");
   };
 
-  const sendChatGPTResponse = async (messageText) => {
+  const sendopenaiResponse = async (messageText) => {
     try {
-      setFetchingChatGPTResponse(true);
+      setFetchingopenaiResponse(true);
 
-      const response = await fetch('/api/chatgpt', {
+      const response = await fetch('/api/openai', {
         method: 'POST',
         body: JSON.stringify({ prompt: messageText }), // Use messageText instead of msg.data
         headers: { 'Content-Type': 'application/json' },
@@ -73,19 +73,19 @@ const AblyChatComponent = () => {
     // Parse the JSON response
       const data = await response.json();
 
-    // Extract the chatGPTResponse from the data object
-    const chatGPTResponse = "GPT: " + data.response;
+    // Extract the openaiResponse from the data object
+    const openaiResponse = "GPT: " + data.response;
   
     channel.publish({
       name: "chat-message",
-      data: { text: chatGPTResponse, color: userColor, initials: userInitials },
+      data: { text: openaiResponse, color: userColor, initials: userInitials },
     });
   } catch (error) {
-    console.error("Error fetching ChatGPT response:", error);
+    console.error("Error fetching openai response:", error);
   
     // Add error handling here
   } finally {
-    setFetchingChatGPTResponse(false);
+    setFetchingopenaiResponse(false);
   }
 };
   
@@ -96,8 +96,8 @@ const AblyChatComponent = () => {
       data: { text: messageText, color: userColor, initials: userInitials },
     });
 
-    if (isChatGPTTrigger(messageText)) {
-      await sendChatGPTResponse(messageText, userColor);
+    if (isopenaiTrigger(messageText)) {
+      await sendopenaiResponse(messageText, userColor);
     }
 
     setMessageText("");
@@ -121,9 +121,9 @@ const AblyChatComponent = () => {
 
 const messages = receivedMessages.map((message, index) => {
   const author = message.connectionId === ably.connection.id ? "me" : "other";
-  const isGPTMessage = message.data.text.startsWith("ChatGPT: ");
+  const isGPTMessage = message.data.text.startsWith("openai: ");
   const textColor = getContrastTextColor(message.data.color);
-  const className = `${isGPTMessage ? styles.chatGPTMessage : styles.message} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`;
+  const className = `${isGPTMessage ? styles.openaiMessage : styles.message} ${author === "me" ? styles.messageSentByMe : styles.messageSentByOthers}`;
 
 
   // Set the font color based on the message author.
@@ -163,9 +163,9 @@ const messages = receivedMessages.map((message, index) => {
     <div className={styles.chatHolder}>
       <div className={styles.chatText}>
         {messages}
-        {fetchingChatGPTResponse && (
+        {fetchingopenaiResponse && (
           <span className={styles.fetchingMessage}>
-            Fetching response from ChatGPT...
+            Fetching response from openai...
           </span>
         )}
         <div ref={(element) => { messageEnd = element; }}></div>
