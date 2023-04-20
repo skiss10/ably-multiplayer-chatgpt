@@ -31,20 +31,16 @@ Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/ser
 
 # What are we going to build?
 
-![The UI of the chat app we'll build. It is a window with speech bubbles for text.](https://cdn.glitch.com/0cb30add-c9ef-4c00-983c-e12deb0d4080%2Fchatapp.png?v=1612279601157)  
+![Chat Screenshot](./public/chat_screenshot.png)
 *The UI of the app we'll build with this walkthrough*  
-
-TODO Update image
 
 We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a two Next.js serverless functions which will be used to connect to Ably and retrieve prompt responses from OpenAI.
 
 # How to prompt OpenAI?
 
-It's as simple as following whatever prompt you want to provide to OpenAI with "Hey OpenAI". So if you want to ask OpenAI who Tony Stark is, you would publish the following message into the chat:
+It's as simple as following whatever prompt you want to provide to OpenAI with "Hey OpenAI". So if you want to ask OpenAI about Ably, you would publish the following message into the chat (as shown above):
 
-"Hey OpenAI Who is Tony Stark?"
-
-TODO - add images
+"Hey OpenAI what is Ably?"
 
 ## Dependencies
 
