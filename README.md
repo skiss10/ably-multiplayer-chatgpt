@@ -85,7 +85,7 @@ The chat app we'll build uses [Ably](https://www.ably.io/) for [pub/sub messagin
 
 From an architecture perspective, Ably will serve as the transport layer for all chat messages while the client handles the publishing of messages onto Ably channels and the prompting of OpenAI for the completion request. 
 
-https://voltaire.ably.com/static/how-ably-works-diagram-d12e6ae50a4e3e381b5a4e5f27340076.png
+![chat_architecture](./public/chat_architecture.png)
 
 Note - [integration rules and webhooks](https://ably.com/docs/general/integrations) can be used on Ably channels to trigger serverless functions on your backend, as depicted in this diagram. See [this tutorial](https://ably.com/tutorials/reactor-event-aws) as an example.
 

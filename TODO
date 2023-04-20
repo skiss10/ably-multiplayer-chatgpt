@@ -1,7 +1,1 @@
 1) Add an architecture of Ably channels
-
-2) Update Assets in readme with content team
-
-3) Handle concatenated messages for customer (make it full length response)
-
-4) HAndle error for OPenAI token limit reached
