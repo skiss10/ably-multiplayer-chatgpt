@@ -517,7 +517,7 @@ Our next step is to determine if a message is an OpenAI prompt that needs to be 
       const data = await response.json();
 
     // Extract the openaiResponse from the data object
-    const openaiResponse = "GPT: " + data.response;
+    const openaiResponse = "OpenAI: " + data.response;
   
     channel.publish({
       name: "chat-message",

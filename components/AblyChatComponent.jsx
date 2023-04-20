@@ -85,7 +85,7 @@ const AblyChatComponent = () => {
       const data = await response.json();
 
     // Extract the openaiResponse from the data object
-    const openaiResponse = "GPT: " + data.response;
+    const openaiResponse = "OpenAI: " + data.response;
   
     channel.publish({
       name: "chat-message",
