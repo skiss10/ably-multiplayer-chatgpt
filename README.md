@@ -38,7 +38,7 @@ TODO Update image
 
 We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a two Next.js serverless functions which will be used to connect to Ably and retrieve prompt responses from OpenAI.
 
-# How to prompt openai?
+# How to prompt OpenAI?
 
 It's as simple as following whatever prompt you want to provide to OpenAI with "Hey OpenAI". So if you want to ask OpenAI who Tony Stark is, you would publish the following message into the chat:
 
@@ -70,9 +70,10 @@ Vercel provides some Next.js command line tools to help us. They don't need to b
 
 1. In your terminal, type `npx create-next-app` to create an empty Next.js app.
 2. Create a file called `.env` in the root of the directory, this is where we'll put the project's environment variables.
-3. Add your Ably API key to the .env file:
+3. Add your Ably and OpenAI API keys to the .env file:
 ```
 ABLY_API_KEY=your-ably-api-key:goes-here
+OPENAI_API_KEY=your-openai-api-key:goes-here
 ```
 4. Navigate to your Next.js application directory and type into the console:
 
