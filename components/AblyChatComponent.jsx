@@ -7,15 +7,21 @@ const AblyChatComponent = () => {
   let inputBox = null;
   let messageEnd = null;
 
+  // State for user input, received messages, and OpenAI response fetching status.
   const [messageText, setMessageText] = useState("");
   const [receivedMessages, setMessages] = useState([]);
   const [fetchingopenaiResponse, setFetchingopenaiResponse] = useState(false);
+
+  // Check if message text is empty (whitespace only).
   const messageTextIsEmpty = messageText.trim().length === 0;
+
+  // Generate a random user color and initials.
   const [userColor, setUserColor] = useState(
     "#" + Math.floor(Math.random() * 16777215).toString(16)
   );
   const [userInitials, setUserInitials] = useState(generateRandomInitials());
 
+  // generate a random set of initials
   function generateRandomInitials() {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const firstInitial = chars[Math.floor(Math.random() * chars.length)];
@@ -23,6 +29,7 @@ const AblyChatComponent = () => {
     return firstInitial + secondInitial;
   }
 
+  // ensure color contrast of fake initials and background look good
   function getContrastTextColor(color) {
     const hexColor = color.replace("#", "");
     const red = parseInt(hexColor.substr(0, 2), 16);
@@ -32,11 +39,13 @@ const AblyChatComponent = () => {
     return brightness > 128 ? "black" : "white";
   }
 
+  // Initialize channel, subscribe to messages, and update received messages.
   const [channel, ably] = useChannel("chat-demo", (message) => {
     const history = receivedMessages.slice(-199);
     setMessages([...history, message]);
   });
 
+  // Fetch chat history on component mount.
   useEffect(() => {
     const fetchChannelHistory = async () => {
       try {
@@ -51,10 +60,12 @@ const AblyChatComponent = () => {
     fetchChannelHistory();
   }, [channel]);
 
+  // Determine if a message should trigger an OpenAI response.
   const isopenaiTrigger = (message) => {
     return message.startsWith("Hey OpenAI");
   };
 
+  // Send an OpenAI response.
   const sendopenaiResponse = async (messageText) => {
     try {
       setFetchingopenaiResponse(true);
@@ -88,7 +99,7 @@ const AblyChatComponent = () => {
     setFetchingopenaiResponse(false);
   }
 };
-  
+  // Send a chat message and trigger OpenAI response if applicable.
   const sendChatMessage = async (messageText) => {
     // Publish the original message to the channel first.
     channel.publish({
@@ -105,12 +116,13 @@ const AblyChatComponent = () => {
         inputBox.focus();
     }
 };
-
+  // Handle form submission and send a chat message.
   const handleFormSubmission = (event) => {
     event.preventDefault();
     sendChatMessage(messageText);
   };
 
+  // Handle the Enter key and send a chat message.
   const handleKeyUp = (event) => {
     if (event.key !== 'Enter' || messageTextIsEmpty) {
       return;
@@ -119,7 +131,8 @@ const AblyChatComponent = () => {
     event.preventDefault();
   };
 
-const messages = receivedMessages.map((message, index) => {
+  // Render messages and handle OpenAI responses.
+  const messages = receivedMessages.map((message, index) => {
   const author = message.connectionId === ably.connection.id ? "me" : "other";
   const isGPTMessage = message.data.text.startsWith("openai: ");
   const textColor = getContrastTextColor(message.data.color);

@@ -55,9 +55,9 @@
 .messageWrapper {
     display: flex;
     margin-bottom: 5px;
-  }
+}
   
-  .colorSquare {
+.colorSquare {
     width: 24px; /* Adjust this value according to your desired size */
     height: 24px; /* Adjust this value according to your desired size */
     margin-right: 5px;
@@ -67,12 +67,12 @@
     font-weight: bold;
     border-radius: 50%; /* Added to create a circular shape */
     font-size: 0.8em; /* Adjust this value according to your desired size */
-  }
+}
 
-  .messageSentByMe {
+.messageSentByMe {
     align-self: flex-end;
-  }
+}
   
   .messageSentByOthers {
     align-self: flex-start;
-  }
+}

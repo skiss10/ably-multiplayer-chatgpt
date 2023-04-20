@@ -9,7 +9,7 @@ You'll learn how to -
 * Create an Ably account and get an API key
 * Create a Next.js Vercel Serverless API
 * Use React Functional components and React Hooks with Ably
-* Integrate OpenAI's completion API with your chat application
+* Integrate OpenAI's completion models into your chat application
 * Host your app on Vercel
 
 
@@ -21,9 +21,7 @@ You'll learn how to -
 
 [React](https://reactjs.org/) is a JavaScript library for building user interfaces with encapsulated components that manage their own state.
 
-[OpenAI](https://www.openai.com/) is an artificial intelligence research lab that develops cutting-edge AI models like openai, designed to understand and generate human-like text based on user input.
-
-[openai](https://platform.openai.com/docs/guides/chat/overview) is a powerful language model built on OpenAI's GPT architecture. It can be used to create engaging and context-aware chatbots, generate text, answer questions, and much more.
+[OpenAI](https://www.openai.com/) is an artificial intelligence research lab that develops cutting-edge AI models.
 
 # WebSockets in Vercel with Ably
 
@@ -36,15 +34,17 @@ Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/ser
 ![The UI of the chat app we'll build. It is a window with speech bubbles for text.](https://cdn.glitch.com/0cb30add-c9ef-4c00-983c-e12deb0d4080%2Fchatapp.png?v=1612279601157)  
 *The UI of the app we'll build with this walkthrough*  
 
-We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a Next.js serverless function which will be used to connect to Ably. Further, users of the chat application will be able to query openai and prompt it to share responses in the group chat.
+TODO Update image
+
+We'll build a realtime chat app that runs in the browser. It will be built upon the Next.js [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) template, it will contain a React component which will use Ably to send and receive messages. We'll also write a twoo Next.js serverless functions which will be used to connect to Ably and retrieve prompt responses from OpenAI.
 
 # How to prompt openai?
 
-It's as simple as following whatever prompt you want to provide to openai with "Hey openai... 'prompt'". So if you want to ask openai about Tony Stark, you would publish the following into the chat:
+It's as simple as following whatever prompt you want to provide to OpenAI with "Hey OpenAI". So if you want to ask OpenAI who Tony Stark is, you would publish the following message into the chat:
 
-Hey openai... Who is Tony Stark?
+"Hey OpenAI Who is Tony Stark?"
 
-TODO - add image
+TODO - add images
 
 ## Dependencies
 
@@ -105,21 +105,90 @@ npm install ably@1.2.5-beta.1
 Next, create a file called `./pages/api/createTokenRequest.js` into which add the following code:
 
 ```js
+// Import Ably SDK
 import Ably from "ably/promises";
 
+// Create an async function to handle the request and response
 export default async function handler(req, res) {
+  try {
+
+    // Instantiate Ably client with API key
     const client = new Ably.Realtime(process.env.ABLY_API_KEY);
+
+    // Generate a token request with a specified client ID
     const tokenRequestData = await client.auth.createTokenRequest({ clientId: 'ably-nextjs-demo' });
+
+    // Respond with the token request data and a 200 status code
     res.status(200).json(tokenRequestData);
-};
+  } catch (error) {
+    // Log the error to the console
+    console.error("Error creating Ably token request:", error);
+
+    // Respond with an error message and a 500 status code
+    res.status(500).json({ error: "Failed to create Ably token request" });
+  }
+}
 ```
 
 This serverless function uses the Ably SDK to create a `tokenRequest` with your API key. This token will be used later - it allows you to keep your "real" API key safe while using it in the Next.js app. By default, this API is configured to be available on `http://localhost:3000/api/createTokenRequest`
 We're going to provide this URL to the Ably SDK in our client to authenticate with Ably.
 
+## Writing the Serverless function to connect query OpenAI</a>
+
+Now, you'll need to install the [OpenAI npm package](https://www.npmjs.com/package/openai)
+
+In the terminal, in the root of your new app run:
+
+```bash
+npm install openai
+```
+
+Next, create a file called `./pages/api/openai.js` into which add the following code:
+
+```js
+// Import the necessary classes from the OpenAI package
+import { Configuration, OpenAIApi } from 'openai';
+
+// Create a new Configuration object with the API key from the environment variables
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Instantiate a new OpenAIApi object with the configuration
+const openai = new OpenAIApi(configuration);
+
+// Define the default export as an asynchronous function handling an HTTP request and response
+export default async (req, res) => {
+  try {
+    // Extract the 'prompt' property from the request body
+    const { prompt } = req.body;
+
+    // Call the createCompletion method on the OpenAIApi instance, providing the model, prompt, and temperature
+    const completion = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: prompt,
+      temperature: 0.6,
+    });
+
+    // Get the first choice's text from the completion response
+    const openaiResponse = completion.data.choices[0].text;
+
+    // Set the HTTP response status to 200 (OK) and send the OpenAI response as JSON
+    res.status(200).json({ response: openaiResponse });
+  } catch (error) {
+    // Log the error message to the console if there is an exception
+    console.error('Error fetching openai response:', error);
+    // Set the HTTP response status to 500 (Internal Server Error) and send the error details as JSON
+    res.status(500).json({ error: `Error fetching openai response: ${error.message}`, details: error });
+  }
+};
+```
+
+This serverless function instantiates a new OpenAIApi object and calls the createCompletion method with data passed to it from the request body. 
+
 # The Realtime Chat App Architecture
 
-The topology of our Next.js app will look like this:
+The topology of our Next.js app should now look like this:
 
 ```bash
 ├─ .env
@@ -144,8 +213,8 @@ The topology of our Next.js app will look like this:
 ```
 
 * `/pages/index.js` is the home page
-* `/api/createTokenRequest.js` is our Ably token authentication API
-* `/api/openai.js` is our OpenAI Completion API 
+* `/api/createTokenRequest.js` is our Ably token authentication API / serverless function
+* `/api/openai.js` is our OpenAI Completion API / serverless function
 * `/components/AblyChatComponent.jsx` is the chat component
 * `/components/AblyChatComponent.module.css` contains the styles for the chat component
 * `/components/AblyReactEffect.js` is the Ably React Hook.
@@ -168,12 +237,12 @@ export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Realtime Chat App with Ably, NextJS and Vercel</title>
         <link rel="icon" href="https://static.ably.dev/motif-red.svg?nextjs-vercel" type="image/svg+xml" />
       </Head>
 
       <main>
-        <h1 className="title">Next.js Chat Demo</h1>
+        <h1 className="title">Multiplayer Chat with OpenAI</h1>
         <AblyChatComponent />
       </main>
 
@@ -186,19 +255,121 @@ export default function Home() {
         <a href="https://ably.com" rel="noopener noreferrer">
           <img src="/ably-logo.svg" alt="Ably Logo" className="logo ably" />
         </a>
+        <a href="https://github.com/ably-labs/NextJS-chat-app" className="github-corner" aria-label="View source on GitHub">
+          <svg width="80" height="80" viewBox="0 0 250 250" className="svg" aria-hidden="true">
+            <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+            <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" className="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" className="octo-body"></path></svg>
+            </a>
       </footer>
 
       <style jsx>{`
-        ...       
+        .container {
+          display: grid;
+          grid-template-rows: 1fr 100px;
+          min-height: 100vh;
+          background-color: #eee;
+        }
+
+        main {
+          display: grid;
+          grid-template-rows: auto 1fr;
+          width: calc(100% - 40px);
+          max-width: 900px;
+          margin: 20px auto;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0px 3px 10px 1px rgba(0,0,0,0.2);
+          background-color: white;
+        }
+
+        .title {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100px;
+          margin: 0;
+          color: white;
+          background: #005C97;
+          background: -webkit-linear-gradient(to right, #363795, #005C97);
+          background: linear-gradient(to right, #363795, #005C97);
+        }
+
+        footer {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+          width: 100vw;
+          height: 100px;
+        }
+
+        .logo {
+          display: block;
+          height: 20px;
+          margin: 0.5em;
+        }
+
+        .svg { 
+          fill:#005C97; 
+          color:#fff; 
+          position: absolute; 
+          top: 0; 
+          border: 0; 
+          right: 0; 
+        }
+
+        .octo-arm {
+          transform-origin: 130px 106px;
+        }
+
+        .github-corner:hover .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+        
+        @keyframes octocat-wave {
+          0%, 100%{transform:rotate(0)}
+          20%,60%{transform:rotate(-25deg)}
+          40%,80%{transform:rotate(10deg)}}
+        }
+
+        @media (min-width: 600px) {
+          .logo {
+            height: 40px;
+            margin: 1em;
+          }
+  
+          .ably {
+            height: 60px;
+          }
+        }
+       
       `}</style>
 
       <style jsx global>{`
-        ...        
+        html,
+        body {
+          padding: 0;
+          margin: 0;
+          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
+            sans-serif;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
+        [data-author="me"] {
+          background: linear-gradient(to right, #363795, #005C97); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+          color: white;
+          align-self: flex-end;
+          border-bottom-right-radius: 0!important;
+          border-bottom-left-radius: 10px!important;
+        }
       `}</style>
     </div>
   )
 }
-
 ```
 
 You'll notice that it doesn't look like a regular import - we're including it like this:
@@ -211,7 +382,7 @@ before using it like any other react component:
 
 ```jsx
 <main>
-  <h1 className="title">Next.js Chat Demo</h1>
+  <h1 className="title">Multiplayer Chat with OpenAI</h1>
   <AblyChatComponent />
 </main>
 ```
@@ -242,33 +413,140 @@ const AblyChatComponent = () => {
 Next, set up the state properties that we'll use in the component:
 
 ```jsx
+  // State for user input, received messages, and OpenAI response fetching status.
   const [messageText, setMessageText] = useState("");
   const [receivedMessages, setMessages] = useState([]);
   const [fetchingopenaiResponse, setFetchingopenaiResponse] = useState(false);
+
+  // Check if message text is empty (whitespace only).
   const messageTextIsEmpty = messageText.trim().length === 0;
+
+  // Generate a random user color and initials.
+  const [userColor, setUserColor] = useState(
+    "#" + Math.floor(Math.random() * 16777215).toString(16)
+  );
+  const [userInitials, setUserInitials] = useState(generateRandomInitials());
 ```
 
 * **messageText** will be bound to textarea element where messages can be typed
 * **receiveMessages** to the on screen chat history
 * **setFetchingopenaiResponse** A boolean state variable that indicates whether the openai response is being fetched or not. This is used to display a loading indicator or handle any UI changes during the API call.
 * **messageTextIsEmpty** is used to disable the send button when the textarea is empty
+* **setUserColor** is used to create a unique banner color for the user
+* **setUserInitials** is used to create a random two letter initial combination for a user
+
+Then we set up the functions to ensure the initials color and banner color don't clash
+
+```jsx
+  // generate a random set of initials
+  function generateRandomInitials() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const firstInitial = chars[Math.floor(Math.random() * chars.length)];
+    const secondInitial = chars[Math.floor(Math.random() * chars.length)];
+    return firstInitial + secondInitial;
+  }
+
+  // ensure color contrast of fake initials and background look good
+  function getContrastTextColor(color) {
+    const hexColor = color.replace("#", "");
+    const red = parseInt(hexColor.substr(0, 2), 16);
+    const green = parseInt(hexColor.substr(2, 2), 16);
+    const blue = parseInt(hexColor.substr(4, 2), 16);
+    const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+    return brightness > 128 ? "black" : "white";
+  }
+```
+
 
 Now we'll make use of the `useChannel` hook that we imported earlier.
 
 `useChannel` is a [react-hook](https://reactjs.org/docs/hooks-intro.html) style API for subscribing to messages from an Ably channel. You provide it with a channel name and a callback to be invoked whenever a message is received.
 
 ```jsx
+  // Initialize channel, subscribe to messages, and update received messages.
   const [channel, ably] = useChannel("chat-demo", (message) => {
-    // Here we're computing the state that'll be drawn into the message history
-    // We do that by slicing the last 199 messages from the receivedMessages buffer
-
     const history = receivedMessages.slice(-199);
     setMessages([...history, message]);
-
-    // Then finally, we take the message history, and combine it with the new message
-    // This means we'll always have up to 199 message + 1 new message, stored using the
-    // setMessages react useState hook
   });
+```
+
+Here we're computing the state that'll be drawn into the message history. We do that by slicing the last 199 messages from the receivedMessages buffer. Then finally, we take the message history, and combine it with the new message. This means we'll always have up to 199 message + 1 new message, stored using the setMessages react useState hook
+
+Now lets check the [channel history](https://ably.com/docs/realtime/history?lang=nodejs) for the chat so that previously published messages are populated in the chat window. 
+
+```jsx
+  // Fetch chat history on component mount.
+  useEffect(() => {
+    const fetchChannelHistory = async () => {
+      try {
+        const historyPage = await channel.history({ limit: 20 });
+        const historyMessages = historyPage.items.reverse();
+        setMessages(receivedMessages => [...receivedMessages, ...historyMessages]);
+      } catch (error) {
+        console.error('Error fetching channel history:', error);
+      }
+    };
+
+    fetchChannelHistory();
+  }, [channel]);
+```
+
+Our next step is to determine if a message is an OpenAI prompt that needs to be sent to OpenAI
+
+```jsx
+  // Determine if a message should trigger an OpenAI response.
+  const isopenaiTrigger = (message) => {
+    return message.startsWith("Hey OpenAI");
+  };
+
+  // Send an OpenAI response.
+  const sendopenaiResponse = async (messageText) => {
+    try {
+      setFetchingopenaiResponse(true);
+
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: messageText }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+    // Extract the openaiResponse from the data object
+    const openaiResponse = "GPT: " + data.response;
+  
+    channel.publish({
+      name: "chat-message",
+      data: { text: openaiResponse, color: userColor, initials: userInitials },
+    });
+  } catch (error) {
+    console.error("Error fetching openai response:", error);
+  
+  } finally {
+    setFetchingopenaiResponse(false);
+  }
+};
+  // Send a chat message and trigger OpenAI response if applicable.
+  const sendChatMessage = async (messageText) => {
+    // Publish the original message to the channel first.
+    channel.publish({
+      name: "chat-message",
+      data: { text: messageText, color: userColor, initials: userInitials },
+    });
+
+    if (isopenaiTrigger(messageText)) {
+      await sendopenaiResponse(messageText, userColor);
+    }
+
+    setMessageText("");
+    if (inputBox) {
+        inputBox.focus();
+    }
+};
 ```
 
 Now, let's discuss the openai integration and how messages are handled.

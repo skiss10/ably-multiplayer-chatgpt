@@ -1,7 +1,7 @@
 1) Add an architecture of Ably channels
 
-2) Fix UI for Chat GPT to look the setMessages
+2) Update Assets in readme with content team
 
-3) Fix Square to be same size as the chat box (and add two random letters in the box like a simulated first and last name)
+3) Handle concatenated messages for customer (make it full length response)
 
-
+4) HAndle error for OPenAI token limit reached
