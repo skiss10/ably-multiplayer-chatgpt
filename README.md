@@ -167,31 +167,37 @@ const openai = new OpenAIApi(configuration);
 // Define the default export as an asynchronous function handling an HTTP request and response
 export default async (req, res) => {
   try {
-    // Extract the 'prompt' property from the request body
     const { prompt } = req.body;
 
-    // Call the createCompletion method on the OpenAIApi instance, providing the model, prompt, and temperature
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: prompt,
       temperature: 0.6,
+      max_tokens: 100, //NOTE: increasing this allows the requrest to have more characters
     });
 
     // Get the first choice's text from the completion response
     const openaiResponse = completion.data.choices[0].text;
 
-    // Set the HTTP response status to 200 (OK) and send the OpenAI response as JSON
     res.status(200).json({ response: openaiResponse });
   } catch (error) {
-    // Log the error message to the console if there is an exception
     console.error('Error fetching openai response:', error);
-    // Set the HTTP response status to 500 (Internal Server Error) and send the error details as JSON
     res.status(500).json({ error: `Error fetching openai response: ${error.message}`, details: error });
   }
 };
 ```
 
 This serverless function instantiates a new OpenAIApi object, calls the createCompletion method with data passed to it from the request body, and returns the response from OpenAI.
+
+An important callout here is the max_tokens parameter. OpenAI explains that [tokens](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) are a way to control the length of completion from OpenAI models. There are set number of tokens on free accounts so be sure to set this parameter according to your needs.
+
+To get additional context on how tokens stack up, consider this:
+
+Wayne Gretzky’s quote "You miss 100% of the shots you don't take" contains 11 tokens.
+
+OpenAI’s charter contains 476 tokens.
+
+The transcript of the US Declaration of Independence contains 1,695 tokens.
 
 # The Realtime Chat App Architecture
 

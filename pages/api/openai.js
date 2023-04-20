@@ -18,6 +18,7 @@ export default async (req, res) => {
       model: "text-davinci-003",
       prompt: prompt,
       temperature: 0.6,
+      max_tokens: 100, //NOTE: increasing this allows the requrest to have more characters
     });
 
     // Get the first choice's text from the completion response
