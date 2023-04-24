@@ -2,7 +2,7 @@
 
 https://next-js-chat-app.vercel.app/
 
-This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates BERT moderation to enhance user experience and provide AI-powered chat assistance.
+This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates OpenAI to enhance user experience and provide AI-powered chat assistance.
 
 You'll learn how to - 
 * Create a brand new Next.js application
