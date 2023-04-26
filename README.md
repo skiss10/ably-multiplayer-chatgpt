@@ -1,8 +1,8 @@
-# Multiplayer Chat App with OpenAI, Next.js, Ably, and Vercel
+# Group Chat App with OpenAI, Next.js, Ably, and Vercel
 
 https://next-js-chat-app.vercel.app/
 
-This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates OpenAI to enhance user experience and provide AI-powered chat assistance.
+This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates OpenAI's completion API to enhance user experience and provide AI-powered chat assistance.
 
 You'll learn how to - 
 * Create a brand new Next.js application
@@ -28,6 +28,10 @@ You'll learn how to -
 ![Vercel and Websockets](https://cdn.glitch.com/0cb30add-c9ef-4c00-983c-e12deb0d4080%2Fvercel-websockets.png?v=1610475709091)
 
 Vercel allows users to deploy [Serverless Functions](https://vercel.com/docs/serverless-functions/introduction), which are essentially just blocks of code which provide a response to an HTTP request. However, these functions have a maximum execution timeout, which means that it is not possible to maintain a WebSocket connection this way. This is where Ably comes in. The client can connect to an [Ably Channel](https://www.ably.io/documentation/realtime/channels) and send and receive messages on it to add Realtime functionality to your app by managing your WebSocket connections for you. We'll go over how to build an app which uses realtime functionality in this walkthrough, if preferred, you can [jump straight to how to use Ably with Vercel](#ablyandvercel).
+
+# Why Ably
+
+Ably Realtime manages a global transport infrastructure that ensures delivery of messages, with low-latency and high-availability, for a seamless end user experience. Designed for scale, Ably's infrastructure simplifies applications requiring real-time data exchange. As a fully managed service, with comprehensive documentation, and dedicated support, Ably allows developers to focus on their application's core functionality.
 
 # What are we going to build?
 
@@ -251,7 +255,7 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className="title">Multiplayer Chat with OpenAI</h1>
+        <h1 className="title">Group Chat with OpenAI</h1>
         <AblyChatComponent />
       </main>
 
@@ -391,7 +395,7 @@ before using it like any other react component:
 
 ```jsx
 <main>
-  <h1 className="title">Multiplayer Chat with OpenAI</h1>
+  <h1 className="title">Group Chat with OpenAI</h1>
   <AblyChatComponent />
 </main>
 ```
