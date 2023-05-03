@@ -1,6 +1,6 @@
 # Group Chat App with OpenAI, Next.js, Ably, and Vercel
 
-This is a demo of building a chat application with [Next.js](https://nextjs.org/) using Ably as the messaging platform. In addition to the chat functionality, this app incorporates OpenAI's completion API to enhance user experience and provide AI-powered chat assistance.
+In this project, we build upon the foundations laid by [Building a realtime chat app with Next.js and Vercel](https://ably.com/blog/realtime-chat-app-nextjs-vercel) to integrate OpenAI's Completion API. This enhancement offers a more engaging user experience and supplies AI-driven chat assistance in a group chat setting.
 
 You'll learn how to - 
 * Create a brand new Next.js application
